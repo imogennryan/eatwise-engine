@@ -106,10 +106,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# Session state initialisation — use moderate_risk as first-load defaults
+# Session state initialisation — blank defaults
 # =============================================================================
 
-for _k, _v in SAMPLE_PATIENTS["moderate_risk"].items():
+_BLANK_DEFAULTS = {
+    "gender": "Female", "age": 18, "height_cm": 140.0, "weight_kg": 40.0,
+    "family_history_with_overweight": "no", "favc": "no", "fcvc": 1.0,
+    "ncp": 1, "caec": "no", "smoke": "no", "ch2o": 1.0,
+    "scc": "no", "faf": 0.0, "tue": 0.0, "calc": "no",
+    "mtrans": "Public_Transportation",
+    "blood_pressure_systolic": 120, "blood_pressure_diastolic": 80,
+    "cholesterol_level": 180, "blood_sugar_level": 90,
+    "chronic_disease": "None", "genetic_risk_factor": "No", "allergies": "None",
+    "daily_steps": 0, "exercise_frequency": 0, "sleep_hours": 7.0,
+    "alcohol_consumption": "No", "smoking_habit": "No",
+    "dietary_habits": "Regular", "caloric_intake": 0,
+    "protein_intake": 0, "carbohydrate_intake": 0, "fat_intake": 0,
+    "preferred_cuisine": "Western", "food_aversions": "None",
+}
+
+for _k, _v in _BLANK_DEFAULTS.items():
     if _k not in st.session_state:
         st.session_state[_k] = _v
 
@@ -443,6 +459,8 @@ else:
 
     max_prob = float(np.max(prob_array))
 
+    st.subheader("Phase 2 - Obesity Classification")
+
     # Row 1: BMI card + Obesity classification card
     col_bmi, col_clf = st.columns(2)
 
@@ -514,8 +532,8 @@ else:
     nutrition = recommend_nutrition(clinical_dict, obesity_class)
     meal_plan = recommend_meal_plan(obesity_class)
 
+    st.subheader("Phase 3 - Nutrition Targets")
     # Nutrition targets: 4 metrics in 4 columns
-    st.subheader("Recommended daily nutrition targets")
     n_col1, n_col2, n_col3, n_col4 = st.columns(4)
 
     n_col1.metric(
@@ -535,8 +553,7 @@ else:
         value=f"{nutrition['Recommended_Fats']:.1f} g",
     )
 
-    # Meal plan: rule-based
-    st.subheader("Suggested meal plan")
+    st.subheader("Phase 3 - Suggested Meal Plan")
     st.info(meal_plan)
     st.caption(
         "The meal plan is based on BMI category, not a trained model. "
