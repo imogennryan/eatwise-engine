@@ -87,29 +87,6 @@ st.markdown("""
     object-fit: contain !important;
     width: 100% !important;
 }
-/* Sidebar toggle hint */
-[data-testid="collapsedControl"] {
-    position: relative;
-}
-[data-testid="collapsedControl"]::after {
-    content: "Inputs here";
-    position: absolute;
-    left: 2.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #8cb450;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    white-space: nowrap;
-    animation: pulse 1.8s ease-in-out infinite;
-}
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
 /* Small red fixed demo button */
 [data-testid="demo-btn-anchor"] button {
     background-color: #dc3545 !important;
@@ -431,6 +408,12 @@ def _build_lifestyle_dict() -> dict:
 # =============================================================================
 
 if not st.session_state.get("should_predict"):
+    st.markdown(
+        "<div style='font-size:1rem; font-weight:600; color:#8cb450; margin-bottom:0.5rem;'>"
+        "&#8592; tap the arrows icon to enter patient inputs"
+        "</div>",
+        unsafe_allow_html=True,
+    )
     st.info(
         "Enter patient details in the sidebar and click **Generate recommendation** to see "
         "obesity classification and dietary targets."
