@@ -788,55 +788,119 @@ def _build_lifestyle_dict() -> dict:
 # Main panel
 # =============================================================================
 
+def _trend_chart(df_plot, y_col, title, color, y_fmt=None):
+    fig = px.line(df_plot, x="Date", y=y_col, markers=True, title=title)
+    fig.update_layout(
+        height=220,
+        margin={"l": 8, "r": 8, "t": 34, "b": 8},
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        xaxis={"showgrid": False, "tickfont": {"size": 10}},
+        yaxis={"gridcolor": "#f0f0f0", "tickfont": {"size": 10},
+               "tickformat": y_fmt or ""},
+        title_font={"size": 12, "color": "#1a1a2e"},
+    )
+    fig.update_traces(
+        line={"color": color, "width": 2.5},
+        marker={"size": 7, "color": color},
+    )
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+
 def _show_patient_history(patient_id: str):
     rows = _fetch_history(patient_id)
     if not rows:
         st.info(f"No records found for patient ID **{patient_id}**.")
         return
+
     df = pd.DataFrame(rows)
-    df["recorded_at"] = pd.to_datetime(df["recorded_at"]).dt.strftime("%d %b %Y %H:%M")
-    st.success(f"{len(rows)} visit(s) found for patient **{patient_id}**")
+    df["recorded_at"] = pd.to_datetime(df["recorded_at"])
+    df = df.sort_values("recorded_at").reset_index(drop=True)
+    latest = df.iloc[-1]
+    n = len(df)
 
-    display_cols = {
-        "recorded_at": "Date",
-        "bmi": "BMI",
-        "bmi_band": "BMI Band",
-        "predicted_class": "Predicted Class",
-        "recommended_calories": "Calories (kcal)",
-        "recommended_protein": "Protein (g)",
-        "recommended_carbs": "Carbs (g)",
-        "recommended_fats": "Fats (g)",
-        "meal_plan": "Meal Plan",
-    }
-    st.dataframe(
-        df[[c for c in display_cols if c in df.columns]].rename(columns=display_cols),
-        use_container_width=True, hide_index=True,
+    st.success(f"{n} visit{'s' if n > 1 else ''} on record for **{patient_id}**")
+
+    # ── Most recent snapshot ──────────────────────────────────────────
+    st.markdown(
+        f"<p style='font-size:0.78rem;color:#8a94a0;margin-bottom:0.4rem;font-weight:600;"
+        f"text-transform:uppercase;letter-spacing:0.06em;'>"
+        f"Most recent visit — {latest['recorded_at'].strftime('%d %b %Y  %H:%M')}</p>",
+        unsafe_allow_html=True,
     )
+    r1c1, r1c2, r1c3, r1c4 = st.columns(4)
+    r1c1.metric("BMI", f"{latest['bmi']:.1f}", help=f"Band: {latest['bmi_band']}")
+    r1c2.metric("Predicted class", latest["predicted_class"].replace("_", " "))
+    r1c3.metric("Recommended calories", f"{latest['recommended_calories']:.0f} kcal")
+    r1c4.metric("Meal plan", latest["meal_plan"])
 
-    if len(rows) > 1:
-        df_plot = pd.DataFrame(rows)
-        df_plot["Date"] = pd.to_datetime(df_plot["recorded_at"]).dt.strftime("%d %b %Y %H:%M")
+    r2c1, r2c2, r2c3, r2c4 = st.columns(4)
+    r2c1.metric("Protein target", f"{latest['recommended_protein']:.0f} g")
+    r2c2.metric("Carbs target", f"{latest['recommended_carbs']:.0f} g")
+    r2c3.metric("Fats target", f"{latest['recommended_fats']:.0f} g")
+    r2c4.metric("Daily steps", f"{latest['recommended_steps']:,}")
 
-        st.markdown("**Trends over time**")
+    if n > 1:
+        st.divider()
+        prev = df.iloc[-2]
+
+        # ── Change since last visit ───────────────────────────────────
+        st.markdown(
+            f"<p style='font-size:0.78rem;color:#8a94a0;margin-bottom:0.4rem;font-weight:600;"
+            f"text-transform:uppercase;letter-spacing:0.06em;'>"
+            f"Change since last visit ({prev['recorded_at'].strftime('%d %b %Y')})</p>",
+            unsafe_allow_html=True,
+        )
+        dc1, dc2, dc3, dc4 = st.columns(4)
+        bmi_d = latest["bmi"] - prev["bmi"]
+        cal_d = latest["recommended_calories"] - prev["recommended_calories"]
+        pro_d = latest["recommended_protein"] - prev["recommended_protein"]
+        fat_d = latest["recommended_fats"] - prev["recommended_fats"]
+        dc1.metric("BMI", f"{latest['bmi']:.1f}", delta=f"{bmi_d:+.1f}", delta_color="inverse")
+        dc2.metric("Calorie target", f"{latest['recommended_calories']:.0f} kcal", delta=f"{cal_d:+.0f} kcal", delta_color="off")
+        dc3.metric("Protein target", f"{latest['recommended_protein']:.0f} g", delta=f"{pro_d:+.0f} g", delta_color="off")
+        dc4.metric("Fats target", f"{latest['recommended_fats']:.0f} g", delta=f"{fat_d:+.0f} g", delta_color="off")
+
+        if latest["predicted_class"] != prev["predicted_class"]:
+            st.warning(
+                f"Classification changed: **{prev['predicted_class'].replace('_',' ')}** "
+                f"→ **{latest['predicted_class'].replace('_',' ')}**"
+            )
+
+        st.divider()
+
+        # ── Trend charts ─────────────────────────────────────────────
+        st.markdown(
+            "<p style='font-size:0.78rem;color:#8a94a0;margin-bottom:0.6rem;font-weight:600;"
+            "text-transform:uppercase;letter-spacing:0.06em;'>Trends across all visits</p>",
+            unsafe_allow_html=True,
+        )
+        df_plot = df.copy()
+        df_plot["Date"] = df_plot["recorded_at"].dt.strftime("%d %b %Y")
+
         t1, t2, t3 = st.columns(3)
-
         with t1:
-            fig_bmi = px.line(df_plot, x="Date", y="bmi", markers=True, title="BMI")
-            fig_bmi.update_layout(height=250, margin={"l":10,"r":10,"t":30,"b":10})
-            fig_bmi.update_traces(line_color="#2864a0")
-            st.plotly_chart(fig_bmi, use_container_width=True, config={"displayModeBar": False})
-
+            _trend_chart(df_plot, "bmi", "BMI over time", "#2864a0")
         with t2:
-            fig_cal = px.line(df_plot, x="Date", y="recommended_calories", markers=True, title="Recommended Calories")
-            fig_cal.update_layout(height=250, margin={"l":10,"r":10,"t":30,"b":10})
-            fig_cal.update_traces(line_color="#8cb450")
-            st.plotly_chart(fig_cal, use_container_width=True, config={"displayModeBar": False})
-
+            _trend_chart(df_plot, "recommended_calories", "Calorie target over time", "#8cb450")
         with t3:
-            fig_conf = px.line(df_plot, x="Date", y="model_confidence", markers=True, title="Model Confidence")
-            fig_conf.update_layout(height=250, margin={"l":10,"r":10,"t":30,"b":10}, yaxis_tickformat=".0%")
-            fig_conf.update_traces(line_color="#fd7e14")
-            st.plotly_chart(fig_conf, use_container_width=True, config={"displayModeBar": False})
+            _trend_chart(df_plot, "model_confidence", "Model confidence over time", "#fd7e14", ".0%")
+
+    # ── Full history table ────────────────────────────────────────────
+    with st.expander(f"Full visit history ({n} records)", expanded=False):
+        display_cols = {
+            "recorded_at": "Date", "bmi": "BMI", "bmi_band": "BMI Band",
+            "predicted_class": "Predicted Class",
+            "recommended_calories": "Calories (kcal)",
+            "recommended_protein": "Protein (g)", "recommended_carbs": "Carbs (g)",
+            "recommended_fats": "Fats (g)", "meal_plan": "Meal Plan",
+        }
+        df_table = df.copy()
+        df_table["recorded_at"] = df_table["recorded_at"].dt.strftime("%d %b %Y %H:%M")
+        st.dataframe(
+            df_table[[c for c in display_cols if c in df_table.columns]].rename(columns=display_cols),
+            use_container_width=True, hide_index=True,
+        )
 
 
 if not st.session_state.get("should_predict"):
@@ -1154,6 +1218,53 @@ else:
         )
 
     st.divider()
+
+    # ------------------------------------------------------------------
+    # Patient progress (returning patients only)
+    # ------------------------------------------------------------------
+
+    _patient_name_for_progress = ss.get("patient_name", "").strip()
+    if _patient_name_for_progress and not ss.get("_is_demo"):
+        _pid_progress = _make_patient_id(_patient_name_for_progress)
+        _history_rows = _fetch_history(_pid_progress)
+        if len(_history_rows) > 1:
+            st.divider()
+            st.subheader("Patient Progress")
+            _df_h = pd.DataFrame(_history_rows)
+            _df_h["recorded_at"] = pd.to_datetime(_df_h["recorded_at"])
+            _df_h = _df_h.sort_values("recorded_at").reset_index(drop=True)
+            _prev = _df_h.iloc[-2]
+
+            st.markdown(
+                f"<p style='font-size:0.78rem;color:#8a94a0;margin-bottom:0.4rem;font-weight:600;"
+                f"text-transform:uppercase;letter-spacing:0.06em;'>"
+                f"Change since last visit ({_prev['recorded_at'].strftime('%d %b %Y')})</p>",
+                unsafe_allow_html=True,
+            )
+            _pc1, _pc2, _pc3, _pc4 = st.columns(4)
+            _bmi_d = bmi - _prev["bmi"]
+            _cal_d = nutrition["Recommended_Calories"] - _prev["recommended_calories"]
+            _pro_d = nutrition["Recommended_Protein"] - _prev["recommended_protein"]
+            _fat_d = nutrition["Recommended_Fats"] - _prev["recommended_fats"]
+            _pc1.metric("BMI", f"{bmi_rounded}", delta=f"{_bmi_d:+.1f}", delta_color="inverse")
+            _pc2.metric("Calorie target", f"{nutrition['Recommended_Calories']:.0f} kcal", delta=f"{_cal_d:+.0f} kcal", delta_color="off")
+            _pc3.metric("Protein target", f"{nutrition['Recommended_Protein']:.0f} g", delta=f"{_pro_d:+.0f} g", delta_color="off")
+            _pc4.metric("Fats target", f"{nutrition['Recommended_Fats']:.0f} g", delta=f"{_fat_d:+.0f} g", delta_color="off")
+
+            if predicted_label != _prev["predicted_class"]:
+                st.warning(
+                    f"Classification changed since last visit: "
+                    f"**{_prev['predicted_class'].replace('_',' ')}** → **{predicted_label.replace('_',' ')}**"
+                )
+
+            if len(_history_rows) > 2:
+                _df_plot = _df_h.copy()
+                _df_plot["Date"] = _df_plot["recorded_at"].dt.strftime("%d %b %Y")
+                _tc1, _tc2 = st.columns(2)
+                with _tc1:
+                    _trend_chart(_df_plot, "bmi", "BMI over time", "#2864a0")
+                with _tc2:
+                    _trend_chart(_df_plot, "recommended_calories", "Calorie target over time", "#8cb450")
 
     # ------------------------------------------------------------------
     # Section E: Understanding the 7 obesity classes
