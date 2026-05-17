@@ -596,6 +596,16 @@ else:
 
     max_prob = float(np.max(prob_array))
 
+    st.markdown(
+        "<div style='background:#fff3cd;border-left:4px solid #ffc107;padding:10px 14px;"
+        "border-radius:4px;margin-bottom:1rem;font-size:0.88rem;'>"
+        "<strong>Clinical decision support only.</strong> All outputs should be reviewed by the "
+        "treating clinician and verified by an Accredited Practising Dietitian before acting on "
+        "any recommendations. This prototype does not replace clinical judgment."
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
     st.subheader("Phase 2 - Obesity Classification")
 
     # Clinical summary callout
