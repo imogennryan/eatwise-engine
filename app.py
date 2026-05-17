@@ -166,6 +166,40 @@ st.caption(
     "University of Sydney"
 )
 
+with st.expander("Phase 1 - Data Preparation and Exploration", expanded=False):
+    st.markdown(
+        "Phase 1 covered the collection, cleaning, and exploratory analysis of the datasets "
+        "used to train and evaluate the models in this prototype."
+    )
+    st.markdown("**Datasets used:**")
+    st.markdown(
+        "- **D1 - Obesity Prediction** (`ruchikakumbhar/obesity-prediction`, Kaggle): "
+        "2,087 adult survey records with lifestyle features and obesity class labels. "
+        "Used to train the Phase 2 classifier.\n"
+        "- **D4 - Nutrition and Lifestyle**: dataset containing nutritional intake, "
+        "clinical measurements, and meal plan labels. Used for Phase 3 nutrition modelling."
+    )
+    st.markdown("**Cleaning steps:**")
+    st.markdown(
+        "- Removed 170 rows from D1 where the labelled obesity class did not match the "
+        "BMI calculated from the patient's height and weight. These were considered "
+        "mislabelled and would have introduced noise into the classifier.\n"
+        "- Encoded categorical variables (e.g. gender, transport mode, eating habits) "
+        "using one-hot encoding for model compatibility.\n"
+        "- Height and Weight were excluded from the Phase 2 feature set to prevent the "
+        "model from simply learning the BMI formula instead of lifestyle patterns."
+    )
+    st.markdown("**Key findings from EDA:**")
+    st.markdown(
+        "- Obesity class distribution was reasonably balanced across the 7 categories, "
+        "making the dataset suitable for multi-class classification.\n"
+        "- Lifestyle features such as family history of overweight, frequency of high-calorie "
+        "food consumption, and physical activity frequency showed clear associations with "
+        "obesity class.\n"
+        "- The D4 meal plan labels showed no meaningful correlation with the available input "
+        "features, which foreshadowed the poor performance of the Phase 3 meal plan classifier."
+    )
+
 # =============================================================================
 # Sidebar — shared option lists
 # =============================================================================
