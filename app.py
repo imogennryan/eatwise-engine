@@ -277,7 +277,7 @@ components.html("""
 # Session state initialisation — blank defaults
 # =============================================================================
 
-_DEFAULTS_VERSION = "v6-patientid"
+_DEFAULTS_VERSION = "v7-pendingfix"
 
 _BLANK_DEFAULTS = {
     "patient_name": "",
@@ -302,6 +302,12 @@ if st.session_state.get("_defaults_version") != _DEFAULTS_VERSION:
         st.session_state[_k] = _v
     st.session_state["_defaults_version"] = _DEFAULTS_VERSION
     st.session_state["should_predict"] = False
+    st.rerun()
+
+# Apply any pending state changes from the previous run (set before widgets render)
+if "_pending_state" in st.session_state:
+    for _k, _v in st.session_state.pop("_pending_state").items():
+        st.session_state[_k] = _v
     st.rerun()
 
 if "input_mode" not in st.session_state:
@@ -407,8 +413,7 @@ st.sidebar.divider()
 
 # Reset to blank when switching to manual entry
 if _input_mode == "Manual entry" and st.session_state.get("_last_mode") != "Manual entry":
-    for _k, _v in _BLANK_DEFAULTS.items():
-        st.session_state[_k] = _v
+    st.session_state["_pending_state"] = dict(_BLANK_DEFAULTS)
     st.session_state["should_predict"] = False
     st.session_state["_last_mode"] = "Manual entry"
     st.rerun()
@@ -423,24 +428,21 @@ if _input_mode == "Use sample patient (for demo)":
     _btn_col_a, _btn_col_b, _btn_col_c = st.sidebar.columns(3)
 
     if _btn_col_a.button("High-risk", use_container_width=True):
-        for _k, _v in SAMPLE_PATIENTS["high_risk"].items():
-            st.session_state[_k] = _v
+        st.session_state["_pending_state"] = dict(SAMPLE_PATIENTS["high_risk"])
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = True
         st.session_state["_result_saved"] = False
         st.rerun()
 
     if _btn_col_b.button("Moderate", use_container_width=True):
-        for _k, _v in SAMPLE_PATIENTS["moderate_risk"].items():
-            st.session_state[_k] = _v
+        st.session_state["_pending_state"] = dict(SAMPLE_PATIENTS["moderate_risk"])
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = True
         st.session_state["_result_saved"] = False
         st.rerun()
 
     if _btn_col_c.button("Low-risk", use_container_width=True):
-        for _k, _v in SAMPLE_PATIENTS["low_risk"].items():
-            st.session_state[_k] = _v
+        st.session_state["_pending_state"] = dict(SAMPLE_PATIENTS["low_risk"])
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = True
         st.session_state["_result_saved"] = False
@@ -917,8 +919,7 @@ if not st.session_state.get("should_predict"):
     )
     with st.container(key="demo-btn-anchor"):
         if st.button("▶ Quick demo", key="demo_quick"):
-            for _k, _v in SAMPLE_PATIENTS["moderate_risk"].items():
-                st.session_state[_k] = _v
+            st.session_state["_pending_state"] = dict(SAMPLE_PATIENTS["moderate_risk"])
             st.session_state["should_predict"] = True
             st.session_state["_is_demo"] = True
             st.session_state["_result_saved"] = False
