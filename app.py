@@ -588,24 +588,23 @@ else:
     meal_plan = recommend_meal_plan(obesity_class)
 
     st.subheader("Phase 3 - Nutrition Targets")
-    # Nutrition targets: 4 metrics in 4 columns
     n_col1, n_col2, n_col3, n_col4 = st.columns(4)
 
-    n_col1.metric(
-        label="Calories",
-        value=f"{nutrition['Recommended_Calories']:.1f} kcal",
+    n_col1.metric(label="Calories", value=f"{nutrition['Recommended_Calories']:.1f} kcal")
+    n_col2.metric(label="Protein",  value=f"{nutrition['Recommended_Protein']:.1f} g")
+    n_col3.metric(label="Carbs",    value=f"{nutrition['Recommended_Carbs']:.1f} g")
+    n_col4.metric(label="Fats",     value=f"{nutrition['Recommended_Fats']:.1f} g")
+
+    w_col1, w_col2 = st.columns(2)
+    w_col1.metric(
+        label="Water",
+        value=f"{nutrition['Recommended_Water_ml'] / 1000:.1f} L/day",
+        help="Estimated from body weight (35 ml/kg), with an extra 300 ml added for 3+ exercise days per week.",
     )
-    n_col2.metric(
-        label="Protein",
-        value=f"{nutrition['Recommended_Protein']:.1f} g",
-    )
-    n_col3.metric(
-        label="Carbs",
-        value=f"{nutrition['Recommended_Carbs']:.1f} g",
-    )
-    n_col4.metric(
-        label="Fats",
-        value=f"{nutrition['Recommended_Fats']:.1f} g",
+    w_col2.metric(
+        label="Daily steps",
+        value=f"{nutrition['Recommended_Steps']:,}",
+        help="Target based on BMI category. Obese: 8,000 (build up gradually); overweight/normal: 10,000; underweight: 7,500.",
     )
 
     st.subheader("Phase 3 - Suggested Meal Plan")

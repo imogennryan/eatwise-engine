@@ -26,6 +26,14 @@ _CALORIE_ADJUST = {
     "obese":       -500,   # moderate deficit
 }
 
+# Recommended daily steps by obesity class.
+_DAILY_STEPS = {
+    "underweight": 7500,   # moderate activity — avoid excessive calorie burn
+    "normal":      10000,  # standard WHO target
+    "overweight":  10000,  # support gradual weight loss
+    "obese":       8000,   # realistic starting target, build toward 10,000
+}
+
 # Protein target (g per kg body weight) by obesity class.
 _PROTEIN_G_PER_KG = {
     "underweight": 1.6,   # anabolic support
@@ -90,11 +98,20 @@ def recommend_nutrition(clinical_dict: dict, obesity_class: str) -> dict:
     fat_g     = (_FAT_FRACTION.get(oc, 0.30) * target_cal) / 9
     carb_g    = max((target_cal - protein_g * 4 - fat_g * 9) / 4, 0.0)
 
+    # Water: 35 ml per kg body weight, +300 ml if exercising 3+ days/week
+    water_ml = weight * 35 + (300 if ex_freq >= 3 else 0)
+    water_ml = round(min(max(water_ml, 1500), 4000) / 100) * 100  # clamp 1.5–4L, round to 100ml
+
+    # Daily steps target by obesity class
+    steps = _DAILY_STEPS.get(oc, 10000)
+
     return {
         "Recommended_Calories": round(target_cal, 1),
         "Recommended_Protein":  round(protein_g, 1),
         "Recommended_Carbs":    round(carb_g, 1),
         "Recommended_Fats":     round(fat_g, 1),
+        "Recommended_Water_ml": int(water_ml),
+        "Recommended_Steps":    int(steps),
     }
 
 
