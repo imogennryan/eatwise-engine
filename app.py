@@ -146,12 +146,13 @@ _BLANK_DEFAULTS = {
     "preferred_cuisine": "Western", "food_aversions": "None",
 }
 
-# Force reset if the version has changed (clears old cached moderate_risk values)
+# Force reset if the version has changed (clears old cached values)
 if st.session_state.get("_defaults_version") != _DEFAULTS_VERSION:
     for _k, _v in _BLANK_DEFAULTS.items():
         st.session_state[_k] = _v
     st.session_state["_defaults_version"] = _DEFAULTS_VERSION
     st.session_state["should_predict"] = False
+    st.rerun()
 
 if "input_mode" not in st.session_state:
     st.session_state["input_mode"] = "Use sample patient (for demo)"
@@ -240,6 +241,8 @@ if _input_mode == "Manual entry" and st.session_state.get("_last_mode") != "Manu
     for _k, _v in _BLANK_DEFAULTS.items():
         st.session_state[_k] = _v
     st.session_state["should_predict"] = False
+    st.session_state["_last_mode"] = "Manual entry"
+    st.rerun()
 st.session_state["_last_mode"] = _input_mode
 
 # =============================================================================
