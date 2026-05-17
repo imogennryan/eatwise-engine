@@ -489,7 +489,7 @@ else:
         margin={"l": 10, "r": 10, "t": 40, "b": 10},
     )
     fig.update_traces(textposition="outside", marker_color="#2864a0")
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
     st.caption(
         "The Random Forest gives probabilities as vote fractions across all 7 classes. "
