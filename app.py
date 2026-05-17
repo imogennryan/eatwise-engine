@@ -82,29 +82,175 @@ except (AttributeError, TypeError):
 
 st.markdown("""
 <style>
-/* Larger logo */
+/* ── Global typography ── */
+html, body, [class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+/* ── Page background ── */
+[data-testid="stAppViewContainer"] {
+    background: #f8f9fa;
+}
+[data-testid="stMain"] {
+    background: #f8f9fa;
+}
+
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background: #ffffff !important;
+    border-right: 1px solid #e8ecf0 !important;
+}
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.5rem;
+}
+
+/* ── Sidebar logo ── */
 [data-testid="stSidebarLogo"] {
-    height: 80px !important;
+    height: 72px !important;
 }
 [data-testid="stSidebarLogo"] img {
-    max-height: 80px !important;
+    max-height: 72px !important;
     object-fit: contain !important;
     width: 100% !important;
 }
-/* Small red fixed demo button */
+
+/* ── Metric cards ── */
+[data-testid="stMetric"] {
+    background: #ffffff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem 1rem !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s;
+}
+[data-testid="stMetric"]:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+[data-testid="stMetricLabel"] {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #8a94a0 !important;
+}
+[data-testid="stMetricValue"] {
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: #1a1a2e !important;
+    line-height: 1.2 !important;
+}
+[data-testid="stMetricDelta"] {
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
+}
+
+/* ── Expanders ── */
+[data-testid="stExpander"] {
+    background: #ffffff;
+    border: 1px solid #e8ecf0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+[data-testid="stExpander"] summary {
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    padding: 0.85rem 1rem !important;
+}
+
+/* ── Info / warning callouts ── */
+[data-testid="stAlert"] {
+    border-radius: 12px !important;
+    border-width: 0 0 0 4px !important;
+    font-size: 0.88rem !important;
+}
+
+/* ── Dividers ── */
+hr {
+    border: none !important;
+    border-top: 1px solid #e8ecf0 !important;
+    margin: 1.5rem 0 !important;
+}
+
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] {
+    border-radius: 12px !important;
+    overflow: hidden;
+    border: 1px solid #e8ecf0 !important;
+}
+
+/* ── Buttons ── */
+[data-testid="stButton"] > button {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    transition: all 0.2s !important;
+}
+[data-testid="stButton"] > button[kind="primary"] {
+    background: #8cb450 !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(140,180,80,0.3) !important;
+}
+[data-testid="stButton"] > button[kind="primary"]:hover {
+    background: #7da344 !important;
+    box-shadow: 0 4px 14px rgba(140,180,80,0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Page title ── */
+h1 {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em !important;
+    color: #1a1a2e !important;
+}
+h2 {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: #1a1a2e !important;
+    margin-top: 0.5rem !important;
+}
+h3 {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #1a1a2e !important;
+}
+
+/* ── Caption ── */
+[data-testid="stCaptionContainer"] {
+    color: #8a94a0 !important;
+    font-size: 0.78rem !important;
+}
+
+/* ── Text input & selectbox ── */
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input,
+[data-testid="stSelectbox"] > div {
+    border-radius: 10px !important;
+    border-color: #e0e5eb !important;
+    font-size: 0.88rem !important;
+}
+
+/* ── Quick demo button ── */
 [data-testid="demo-btn-anchor"] button {
-    background-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    color: white !important;
-    font-size: 0.72rem !important;
-    padding: 0.25rem 0.7rem !important;
-    position: fixed !important;
-    bottom: 56px !important;
-    left: 276px !important;
-    z-index: 9999 !important;
-    width: auto !important;
-    min-width: 0 !important;
-    line-height: 1.4 !important;
+    background: #1a1a2e !important;
+    border-color: #1a1a2e !important;
+    color: #ffffff !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    padding: 0.35rem 1rem !important;
+}
+[data-testid="demo-btn-anchor"] button:hover {
+    background: #2d2d4e !important;
+}
+
+/* ── Tabs ── */
+[data-testid="stTabs"] [role="tab"] {
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
