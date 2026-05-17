@@ -1156,6 +1156,29 @@ else:
     if ss.get("chronic_disease", "None") != "None":
         st.caption(f"Chronic disease on record: **{ss['chronic_disease']}**")
 
+    with st.expander("What do these indicators mean?", expanded=False):
+        st.markdown("**Blood Pressure**")
+        st.markdown(
+            "- **Normal** (below 120/80): healthy range, no action needed\n"
+            "- **Elevated** (120-129 / below 80): above ideal — lifestyle changes recommended\n"
+            "- **High Stage 1** (130-139 / 80-89): early hypertension — clinician review advised\n"
+            "- **High** (140+ / 90+): hypertension — medical management likely required\n"
+            "- **Crisis** (180+ / 120+): hypertensive crisis — urgent medical attention required"
+        )
+        st.markdown("**Cholesterol**")
+        st.markdown(
+            "- **Desirable** (below 200 mg/dL): low cardiovascular risk\n"
+            "- **Borderline** (200-239 mg/dL): moderate risk — dietary review recommended\n"
+            "- **High** (240+ mg/dL): elevated cardiovascular risk — medical review advised"
+        )
+        st.markdown("**Blood Sugar** (fasting)")
+        st.markdown(
+            "- **Normal** (below 100 mg/dL): healthy fasting glucose\n"
+            "- **Prediabetes** (100-125 mg/dL): above normal — lifestyle intervention recommended\n"
+            "- **Diabetic range** (126+ mg/dL): consistent with diabetes — medical review required"
+        )
+        st.caption("Thresholds based on AHA blood pressure categories and NCEP/ADA clinical guidelines.")
+
     st.divider()
 
     # ------------------------------------------------------------------
