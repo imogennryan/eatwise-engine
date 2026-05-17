@@ -544,7 +544,9 @@ else:
         st.number_input(
             "Daily steps", min_value=0, max_value=30000, step=500,
             key="daily_steps",
+            help="Low activity: under 5,000 | Medium activity: 5,000-9,999 | High activity: 10,000+",
         )
+        st.caption("Low: <5,000  |  Medium: 5,000-9,999  |  High: 10,000+")
         st.number_input(
             "Exercise frequency (days/week)",
             min_value=0, max_value=7, step=1,
