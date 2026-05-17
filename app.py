@@ -637,6 +637,29 @@ else:
         "See the limitations section below for more detail."
     )
 
+    with st.expander("What does this meal plan mean?", expanded=False):
+        st.markdown(
+            "**High-Protein Diet**\n"
+            "Focus on protein at every meal to support muscle and manage hunger. "
+            "Good sources include lean meats, fish, eggs, legumes (lentils, chickpeas, beans), "
+            "low-fat dairy, and tofu. Limit refined carbs and sugary foods.\n\n"
+
+            "**Balanced Diet**\n"
+            "No major restrictions - focus on variety and whole foods across all food groups. "
+            "Fill half the plate with vegetables, a quarter with wholegrains (brown rice, oats, wholegrain bread), "
+            "and a quarter with lean protein. Limit ultra-processed foods and added sugar.\n\n"
+
+            "**Low-Carb Diet**\n"
+            "Reduce bread, pasta, white rice, potatoes, and sugary foods. "
+            "Replace these with non-starchy vegetables, lean proteins, eggs, nuts, and healthy fats. "
+            "Supports gradual weight loss by reducing insulin spikes and improving satiety.\n\n"
+
+            "**Low-Fat Diet**\n"
+            "Limit processed fats, fried food, full-fat dairy (cheese, cream, butter), "
+            "fatty meats, and packaged snacks. Focus on lean proteins (chicken, fish, legumes), "
+            "vegetables, fruit, and wholegrains. Choose low-fat dairy where possible."
+        )
+
     st.divider()
 
     # ------------------------------------------------------------------
