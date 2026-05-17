@@ -682,7 +682,8 @@ else:
     st.caption(
         "The Random Forest gives probabilities as vote fractions across all 7 classes. "
         "Winning probabilities are often in the 30-50% range even when overall accuracy is high - "
-        "this is normal for this type of model."
+        "this is normal for this type of model. "
+        "Model performance on held-out test data: **accuracy 85%, weighted F1 0.85**."
     )
 
     # Feature importance chart
@@ -906,6 +907,25 @@ else:
             "**Sample patients** are synthetic profiles for demonstration only. "
             "In clinical use, replace with actual patient data, subject to ethical approval "
             "and validated training data."
+        )
+
+    with st.expander("What we would improve with more time", expanded=False):
+        st.markdown(
+            "- **Validate on Australian clinical data.** The Phase 2 model was trained on a single "
+            "international survey dataset. Retraining or fine-tuning on Australian population data "
+            "would improve clinical relevance and generalisability.\n\n"
+            "- **Replace the rule-based meal plan with a validated dataset.** The D4 meal plan "
+            "labels had no predictive signal. A dataset with meal plans assigned by accredited "
+            "dietitians based on patient profiles would allow a properly trained classifier.\n\n"
+            "- **Add longitudinal tracking.** Rather than a one-off snapshot, a follow-up feature "
+            "would let clinicians monitor whether a patient's lifestyle indicators are improving "
+            "over time, making the tool useful across multiple consultations.\n\n"
+            "- **Integrate with existing clinical systems.** Embedding the tool into an EMR "
+            "(electronic medical record) workflow would reduce data entry burden and allow "
+            "recommendations to be saved directly to patient records.\n\n"
+            "- **Explainability at the individual level.** The current feature importance reflects "
+            "overall model behaviour. Adding SHAP values would show which specific inputs drove "
+            "the prediction for each individual patient, increasing clinical trust."
         )
 
 # =============================================================================
