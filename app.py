@@ -1183,7 +1183,7 @@ else:
     st.subheader("Phase 3 - Nutrition Targets")
     n_col1, n_col2, n_col3, n_col4 = st.columns(4)
 
-    n_col1.metric(label="Calories", value=f"{nutrition['Recommended_Calories']:.1f} kcal")
+    n_col1.metric(label="Calories", value=f"{nutrition['Recommended_Calories']:.0f} kcal")
     n_col2.metric(label="Protein",  value=f"{nutrition['Recommended_Protein']:.1f} g")
     n_col3.metric(label="Carbs",    value=f"{nutrition['Recommended_Carbs']:.1f} g")
     n_col4.metric(label="Fats",     value=f"{nutrition['Recommended_Fats']:.1f} g")
