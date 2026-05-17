@@ -50,6 +50,12 @@ X_COLUMNS = _derive_x_columns()
 _NOMINALS = ["Gender", "family_history", "FAVC", "CAEC", "SMOKE", "SCC", "CALC", "MTRANS"]
 
 
+def get_feature_importances(top_n: int = 12) -> list:
+    """Return top_n (feature_name, importance) pairs sorted by importance descending."""
+    pairs = sorted(zip(X_COLUMNS, MODEL.feature_importances_), key=lambda x: x[1], reverse=True)
+    return [(name, float(imp)) for name, imp in pairs[:top_n]]
+
+
 def predict_obesity(raw_lifestyle_dict: dict) -> tuple[str, np.ndarray]:
     """
     Predict 7-class obesity label from raw lifestyle features.

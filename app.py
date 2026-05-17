@@ -1,10 +1,11 @@
 import numpy as np
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
 
 # Pipeline modules loaded once at import time (models cached in module scope).
-from pipeline.classify_obesity import CLASS_LABELS, predict_obesity
+from pipeline.classify_obesity import CLASS_LABELS, predict_obesity, get_feature_importances
 from pipeline.recommend import recommend_meal_plan, recommend_nutrition  # noqa: F401
 
 # =============================================================================
@@ -417,6 +418,64 @@ else:
 # Helpers
 # =============================================================================
 
+# Maps Phase 2 7-class labels to the 4-band system used in Phase 3
+_PHASE2_TO_4BAND = {
+    "Insufficient_Weight":  "underweight",
+    "Normal_Weight":        "normal",
+    "Overweight_Level_I":   "overweight",
+    "Overweight_Level_II":  "overweight",
+    "Obesity_Type_I":       "obese",
+    "Obesity_Type_II":      "obese",
+    "Obesity_Type_III":     "obese",
+}
+
+
+def _bp_status(sys, dia):
+    if sys >= 180 or dia >= 120: return "Crisis",       "#dc3545"
+    if sys >= 140 or dia >= 90:  return "High",         "#dc3545"
+    if sys >= 130 or dia >= 80:  return "High Stage 1", "#fd7e14"
+    if sys >= 120:               return "Elevated",     "#ffc107"
+    return "Normal", "#28a745"
+
+
+def _chol_status(val):
+    if val >= 240: return "High",       "#dc3545"
+    if val >= 200: return "Borderline", "#ffc107"
+    return "Desirable", "#28a745"
+
+
+def _sugar_status(val):
+    if val >= 126: return "Diabetic range", "#dc3545"
+    if val >= 100: return "Prediabetes",    "#ffc107"
+    return "Normal", "#28a745"
+
+
+def _clean_feat(name: str) -> str:
+    _MAP = {
+        "FAF": "Physical activity frequency",
+        "FCVC": "Vegetable intake",
+        "NCP": "Number of meals/day",
+        "CH2O": "Daily water intake",
+        "TUE": "Technology use time",
+        "Age": "Age",
+        "family_history_yes": "Family history of overweight",
+        "family_history_no": "No family history of overweight",
+        "FAVC_yes": "Eats high-calorie food frequently",
+        "FAVC_no": "Avoids high-calorie food",
+        "SMOKE_yes": "Smoker",
+        "SMOKE_no": "Non-smoker",
+        "SCC_yes": "Monitors calorie intake",
+        "SCC_no": "Does not monitor calories",
+        "Gender_Female": "Gender: Female",
+        "Gender_Male": "Gender: Male",
+    }
+    if name in _MAP:
+        return _MAP[name]
+    for prefix, label in [("CAEC_", "Snacking: "), ("CALC_", "Alcohol: "), ("MTRANS_", "Transport: ")]:
+        if name.startswith(prefix):
+            return label + name[len(prefix):].replace("_", " ")
+    return name.replace("_", " ")
+
 def _bmi_display_band(bmi: float) -> str:
     """WHO BMI band label for display (capitalised)."""
     if bmi < 18.5:
@@ -539,7 +598,24 @@ else:
 
     st.subheader("Phase 2 - Obesity Classification")
 
-    # Row 1: BMI card + Obesity classification card
+    # Clinical summary callout
+    p2_4band = _PHASE2_TO_4BAND.get(predicted_label, obesity_class)
+    diverges  = p2_4band != obesity_class
+    _summary = (
+        f"The Phase 2 model predicts this patient's lifestyle pattern is most consistent with "
+        f"**{predicted_label.replace('_', ' ')}** ({max_prob * 100:.0f}% model confidence). "
+        f"Their BMI is **{bmi_rounded}** ({display_band} range)."
+    )
+    if diverges:
+        st.warning(
+            _summary + f"  \n**Note:** the BMI band ({display_band}) and lifestyle-based prediction "
+            f"({predicted_label.replace('_', ' ')}) differ. This may indicate a weight trajectory "
+            f"not yet fully reflected in current BMI - consider discussing lifestyle habits with the patient."
+        )
+    else:
+        st.info(_summary)
+
+    # Row 1: BMI + classification metrics
     col_bmi, col_clf = st.columns(2)
 
     with col_bmi:
@@ -564,7 +640,7 @@ else:
             ),
         )
 
-    # Row 2: Probability distribution chart
+    # Probability distribution chart
     class_names = [CLASS_LABELS[i].replace("_", " ") for i in sorted(CLASS_LABELS)]
     prob_df_data = sorted(
         zip(class_names, prob_array.tolist()),
@@ -574,7 +650,6 @@ else:
     sorted_labels = [r[0] for r in prob_df_data]
     sorted_probs  = [r[1] for r in prob_df_data]
 
-    import pandas as pd
     prob_df = pd.DataFrame({"Class": sorted_labels, "Probability": sorted_probs})
 
     fig = px.bar(
@@ -599,6 +674,65 @@ else:
         "Winning probabilities are often in the 30-50% range even when overall accuracy is high - "
         "this is normal for this type of model."
     )
+
+    # Feature importance chart
+    with st.expander("What drove this prediction?", expanded=False):
+        fi_pairs = get_feature_importances(12)
+        fi_df = pd.DataFrame({
+            "Feature":    [_clean_feat(n) for n, _ in fi_pairs],
+            "Importance": [v for _, v in fi_pairs],
+        })
+        fi_fig = px.bar(
+            fi_df, x="Importance", y="Feature", orientation="h",
+            title="Top lifestyle factors in the Random Forest model",
+            text=fi_df["Importance"].map(lambda v: f"{v*100:.1f}%"),
+        )
+        fi_fig.update_layout(
+            yaxis={"categoryorder": "array", "categoryarray": fi_df["Feature"].tolist()[::-1]},
+            height=380, margin={"l": 10, "r": 10, "t": 40, "b": 10},
+        )
+        fi_fig.update_traces(textposition="outside", marker_color="#8cb450")
+        st.plotly_chart(fi_fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption(
+            "Feature importance reflects which inputs most influenced the Random Forest across all training data. "
+            "It shows overall model behaviour, not a per-patient explanation."
+        )
+
+    st.divider()
+
+    # ------------------------------------------------------------------
+    # Clinical risk indicators
+    # ------------------------------------------------------------------
+
+    st.subheader("Clinical Risk Indicators")
+
+    bp_label, bp_color   = _bp_status(ss["blood_pressure_systolic"], ss["blood_pressure_diastolic"])
+    ch_label, ch_color   = _chol_status(ss["cholesterol_level"])
+    sg_label, sg_color   = _sugar_status(ss["blood_sugar_level"])
+
+    ri1, ri2, ri3 = st.columns(3)
+
+    def _risk_badge(col, title, value_str, label, color):
+        col.markdown(f"**{title}**")
+        col.markdown(f"{value_str}")
+        col.markdown(
+            f"<span style='background:{color};color:white;padding:3px 10px;"
+            f"border-radius:4px;font-size:0.82rem;font-weight:600'>{label}</span>",
+            unsafe_allow_html=True,
+        )
+
+    _risk_badge(ri1, "Blood Pressure",
+                f"{ss['blood_pressure_systolic']}/{ss['blood_pressure_diastolic']} mmHg",
+                bp_label, bp_color)
+    _risk_badge(ri2, "Cholesterol",
+                f"{ss['cholesterol_level']} mg/dL",
+                ch_label, ch_color)
+    _risk_badge(ri3, "Blood Sugar",
+                f"{ss['blood_sugar_level']} mg/dL",
+                sg_label, sg_color)
+
+    if ss.get("chronic_disease", "None") != "None":
+        st.caption(f"Chronic disease on record: **{ss['chronic_disease']}**")
 
     st.divider()
 
@@ -629,6 +763,33 @@ else:
         value=f"{nutrition['Recommended_Steps']:,}",
         help="Target based on BMI category. Obese: 8,000 (build up gradually); overweight/normal: 10,000; underweight: 7,500.",
     )
+
+    # Current vs recommended comparison (only if user entered intake values)
+    if ss.get("caloric_intake", 0) > 0:
+        st.markdown("**Current intake vs recommended targets:**")
+        d1, d2, d3, d4 = st.columns(4)
+        d1.metric(
+            label="Calorie gap",
+            value=f"{nutrition['Recommended_Calories'] - ss['caloric_intake']:+.0f} kcal",
+            help="Recommended minus current reported intake. Negative = currently eating above target.",
+            delta_color="off",
+        )
+        d2.metric(
+            label="Protein gap",
+            value=f"{nutrition['Recommended_Protein'] - ss['protein_intake']:+.0f} g",
+            delta_color="off",
+        )
+        d3.metric(
+            label="Carb gap",
+            value=f"{nutrition['Recommended_Carbs'] - ss['carbohydrate_intake']:+.0f} g",
+            delta_color="off",
+        )
+        d4.metric(
+            label="Fat gap",
+            value=f"{nutrition['Recommended_Fats'] - ss['fat_intake']:+.0f} g",
+            delta_color="off",
+        )
+        st.caption("Positive = patient should increase; negative = patient should reduce.")
 
     st.subheader("Phase 3 - Suggested Meal Plan")
     st.info(meal_plan)
