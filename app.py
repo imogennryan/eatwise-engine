@@ -129,16 +129,16 @@ components.html("""
 # Session state initialisation — blank defaults
 # =============================================================================
 
-_DEFAULTS_VERSION = "v4-blank"
+_DEFAULTS_VERSION = "v5-blank"
 
 _BLANK_DEFAULTS = {
-    "gender": "-- Select --", "age": 18, "height_cm": 140.0, "weight_kg": 40.0,
+    "gender": "-- Select --", "age": 0, "height_cm": 0.0, "weight_kg": 0.0,
     "family_history_with_overweight": "-- Select --", "favc": "-- Select --", "fcvc": 1.0,
     "ncp": 1, "caec": "-- Select --", "smoke": "-- Select --", "ch2o": 1.0,
     "scc": "-- Select --", "faf": 0.0, "tue": 0.0, "calc": "-- Select --",
     "mtrans": "-- Select --",
-    "blood_pressure_systolic": 80, "blood_pressure_diastolic": 50,
-    "cholesterol_level": 100, "blood_sugar_level": 60,
+    "blood_pressure_systolic": 0, "blood_pressure_diastolic": 0,
+    "cholesterol_level": 0, "blood_sugar_level": 0,
     "chronic_disease": "None", "genetic_risk_factor": "No", "allergies": "None",
     "daily_steps": 0, "exercise_frequency": 0, "sleep_hours": 0.0,
     "alcohol_consumption": "No", "smoking_habit": "No",
@@ -287,13 +287,13 @@ if _input_mode == "Use sample patient (for demo)":
 else:
     with st.sidebar.expander("Demographics and anthropometric", expanded=True):
         st.selectbox("Gender", _GENDER_OPTS, key="gender")
-        st.number_input("Age (years)", min_value=18, max_value=90, step=1, key="age")
+        st.number_input("Age (years)", min_value=0, max_value=90, step=1, key="age")
         st.number_input(
-            "Height (cm)", min_value=140.0, max_value=220.0, step=0.5,
+            "Height (cm)", min_value=0.0, max_value=220.0, step=0.5,
             format="%.1f", key="height_cm",
         )
         st.number_input(
-            "Weight (kg)", min_value=40.0, max_value=200.0, step=0.5,
+            "Weight (kg)", min_value=0.0, max_value=200.0, step=0.5,
             format="%.1f", key="weight_kg",
         )
 
@@ -334,22 +334,22 @@ else:
     with st.sidebar.expander("Clinical measurements (Phase 3 inputs)", expanded=False):
         st.number_input(
             "Systolic blood pressure (mmHg)",
-            min_value=80, max_value=200, step=1,
+            min_value=0, max_value=200, step=1,
             key="blood_pressure_systolic",
         )
         st.number_input(
             "Diastolic blood pressure (mmHg)",
-            min_value=50, max_value=120, step=1,
+            min_value=0, max_value=120, step=1,
             key="blood_pressure_diastolic",
         )
         st.number_input(
             "Cholesterol (mg/dL)",
-            min_value=100, max_value=350, step=1,
+            min_value=0, max_value=350, step=1,
             key="cholesterol_level",
         )
         st.number_input(
             "Blood sugar (mg/dL)",
-            min_value=60, max_value=300, step=1,
+            min_value=0, max_value=300, step=1,
             key="blood_sugar_level",
         )
         st.selectbox("Chronic disease", _CHRONIC_OPTS, key="chronic_disease")
@@ -399,7 +399,13 @@ else:
 
     st.sidebar.divider()
 
-    _has_blank = any(st.session_state.get(k) == "-- Select --" for k in _REQUIRED_KEYS)
+    _ss = st.session_state
+    _has_blank = (
+        any(_ss.get(k) == "-- Select --" for k in _REQUIRED_KEYS)
+        or _ss.get("age", 0) == 0
+        or _ss.get("height_cm", 0.0) == 0.0
+        or _ss.get("weight_kg", 0.0) == 0.0
+    )
 
     def _on_predict():
         st.session_state["should_predict"] = True
