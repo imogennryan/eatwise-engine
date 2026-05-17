@@ -18,17 +18,17 @@ SAMPLE_PATIENTS = {
     "high_risk": {
         # Demographics
         "gender": "Female", "age": 52, "height_cm": 165.0, "weight_kg": 95.0,
-        # Lifestyle — Phase 2 classifier inputs
+        # Lifestyle - Phase 2 classifier inputs
         "family_history_with_overweight": "yes", "favc": "yes", "fcvc": 1.0,
         "ncp": 1, "caec": "Frequently", "smoke": "yes", "ch2o": 1.0,
         "scc": "no", "faf": 0.0, "tue": 2.0, "calc": "Frequently",
         "mtrans": "Automobile",
-        # Clinical — Phase 3 inputs
+        # Clinical - Phase 3 inputs
         "blood_pressure_systolic": 155, "blood_pressure_diastolic": 95,
         "cholesterol_level": 245, "blood_sugar_level": 135,
         "chronic_disease": "Hypertension", "genetic_risk_factor": "Yes",
         "allergies": "None",
-        # Behavioural / dietary — Phase 3 inputs
+        # Behavioural / dietary - Phase 3 inputs
         "daily_steps": 2500, "exercise_frequency": 1, "sleep_hours": 6.0,
         "alcohol_consumption": "No", "smoking_habit": "Yes",
         "dietary_habits": "Regular", "caloric_intake": 2800,
@@ -70,7 +70,7 @@ SAMPLE_PATIENTS = {
 }
 
 # =============================================================================
-# Page config — must come before any rendering command
+# Page config - must come before any rendering command
 # =============================================================================
 
 st.set_page_config(page_title="EatWise Engine", layout="wide", initial_sidebar_state="collapsed")
@@ -274,7 +274,7 @@ components.html("""
 """, height=0)
 
 # =============================================================================
-# Session state initialisation — blank defaults
+# Session state initialisation - blank defaults
 # =============================================================================
 
 _DEFAULTS_VERSION = "v7-pendingfix"
@@ -358,7 +358,7 @@ with st.expander("Phase 1 - Data Preparation and Exploration", expanded=False):
     )
 
 # =============================================================================
-# Sidebar — shared option lists
+# Sidebar - shared option lists
 # =============================================================================
 
 _BLANK      = "-- Select --"
@@ -380,7 +380,7 @@ _REQUIRED_KEYS = [
 ]
 
 # =============================================================================
-# Sidebar — patient name (always visible)
+# Sidebar - patient name (always visible)
 # =============================================================================
 
 st.sidebar.text_input(
@@ -391,7 +391,7 @@ st.sidebar.text_input(
 st.sidebar.divider()
 
 # =============================================================================
-# Sidebar — mode toggle (always visible)
+# Sidebar - mode toggle (always visible)
 # =============================================================================
 
 try:
@@ -420,7 +420,7 @@ if _input_mode == "Manual entry" and st.session_state.get("_last_mode") != "Manu
 st.session_state["_last_mode"] = _input_mode
 
 # =============================================================================
-# Sidebar — Mode A: sample patients
+# Sidebar - Mode A: sample patients
 # =============================================================================
 
 if _input_mode == "Use sample patient (for demo)":
@@ -449,7 +449,7 @@ if _input_mode == "Use sample patient (for demo)":
         st.rerun()
 
 # =============================================================================
-# Sidebar — Mode B: manual entry form + Predict button
+# Sidebar - Mode B: manual entry form + Predict button
 # =============================================================================
 
 else:
@@ -853,7 +853,7 @@ def _show_patient_history(patient_id: str):
     st.markdown(
         f"<p style='font-size:0.78rem;color:#8a94a0;margin-bottom:0.4rem;font-weight:600;"
         f"text-transform:uppercase;letter-spacing:0.06em;'>"
-        f"Most recent visit — {latest['recorded_at'].strftime('%d %b %Y  %H:%M')}</p>",
+        f"Most recent visit - {latest['recorded_at'].strftime('%d %b %Y  %H:%M')}</p>",
         unsafe_allow_html=True,
     )
     r1c1, r1c2, r1c3, r1c4 = st.columns(4)
@@ -1160,22 +1160,22 @@ else:
         st.markdown("**Blood Pressure**")
         st.markdown(
             "- **Normal** (below 120/80): healthy range, no action needed\n"
-            "- **Elevated** (120-129 / below 80): above ideal — lifestyle changes recommended\n"
-            "- **High Stage 1** (130-139 / 80-89): early hypertension — clinician review advised\n"
-            "- **High** (140+ / 90+): hypertension — medical management likely required\n"
-            "- **Crisis** (180+ / 120+): hypertensive crisis — urgent medical attention required"
+            "- **Elevated** (120-129 / below 80): above ideal - lifestyle changes recommended\n"
+            "- **High Stage 1** (130-139 / 80-89): early hypertension - clinician review advised\n"
+            "- **High** (140+ / 90+): hypertension - medical management likely required\n"
+            "- **Crisis** (180+ / 120+): hypertensive crisis - urgent medical attention required"
         )
         st.markdown("**Cholesterol**")
         st.markdown(
             "- **Desirable** (below 200 mg/dL): low cardiovascular risk\n"
-            "- **Borderline** (200-239 mg/dL): moderate risk — dietary review recommended\n"
-            "- **High** (240+ mg/dL): elevated cardiovascular risk — medical review advised"
+            "- **Borderline** (200-239 mg/dL): moderate risk - dietary review recommended\n"
+            "- **High** (240+ mg/dL): elevated cardiovascular risk - medical review advised"
         )
         st.markdown("**Blood Sugar** (fasting)")
         st.markdown(
             "- **Normal** (below 100 mg/dL): healthy fasting glucose\n"
-            "- **Prediabetes** (100-125 mg/dL): above normal — lifestyle intervention recommended\n"
-            "- **Diabetic range** (126+ mg/dL): consistent with diabetes — medical review required"
+            "- **Prediabetes** (100-125 mg/dL): above normal - lifestyle intervention recommended\n"
+            "- **Diabetic range** (126+ mg/dL): consistent with diabetes - medical review required"
         )
         st.caption("Thresholds based on AHA blood pressure categories and NCEP/ADA clinical guidelines.")
 
