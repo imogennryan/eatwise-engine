@@ -128,14 +128,14 @@ components.html("""
 # Session state initialisation — blank defaults
 # =============================================================================
 
-_DEFAULTS_VERSION = "v3-blank"
+_DEFAULTS_VERSION = "v4-blank"
 
 _BLANK_DEFAULTS = {
-    "gender": "Female", "age": 18, "height_cm": 140.0, "weight_kg": 40.0,
-    "family_history_with_overweight": "no", "favc": "no", "fcvc": 1.0,
-    "ncp": 1, "caec": "no", "smoke": "no", "ch2o": 1.0,
-    "scc": "no", "faf": 0.0, "tue": 0.0, "calc": "no",
-    "mtrans": "Public_Transportation",
+    "gender": "-- Select --", "age": 18, "height_cm": 140.0, "weight_kg": 40.0,
+    "family_history_with_overweight": "-- Select --", "favc": "-- Select --", "fcvc": 1.0,
+    "ncp": 1, "caec": "-- Select --", "smoke": "-- Select --", "ch2o": 1.0,
+    "scc": "-- Select --", "faf": 0.0, "tue": 0.0, "calc": "-- Select --",
+    "mtrans": "-- Select --",
     "blood_pressure_systolic": 80, "blood_pressure_diastolic": 50,
     "cholesterol_level": 100, "blood_sugar_level": 60,
     "chronic_disease": "None", "genetic_risk_factor": "No", "allergies": "None",
@@ -205,15 +205,23 @@ with st.expander("Phase 1 - Data Preparation and Exploration", expanded=False):
 # Sidebar — shared option lists
 # =============================================================================
 
-_YES_NO      = ["yes", "no"]
-_FREQ_OPTS   = ["no", "Sometimes", "Frequently", "Always"]
-_MTRANS_OPTS = ["Public_Transportation", "Automobile", "Walking", "Motorbike", "Bike"]
+_BLANK      = "-- Select --"
+_YES_NO      = [_BLANK, "yes", "no"]
+_FREQ_OPTS   = [_BLANK, "no", "Sometimes", "Frequently", "Always"]
+_MTRANS_OPTS = [_BLANK, "Public_Transportation", "Automobile", "Walking", "Motorbike", "Bike"]
 _CHRONIC_OPTS = ["None", "Hypertension", "Diabetes", "Heart Disease", "Obesity"]
 _YN_TITLE    = ["No", "Yes"]
 _ALLERGY_OPTS = ["None", "Gluten Intolerance", "Lactose Intolerance", "Nut Allergy"]
 _DIET_OPTS   = ["Regular", "Keto", "Vegan", "Vegetarian"]
 _CUISINE_OPTS = ["Western", "Asian", "Indian", "Mediterranean"]
 _AVERSION_OPTS = ["None", "Salty", "Spicy", "Sweet"]
+_GENDER_OPTS = [_BLANK, "Female", "Male"]
+
+# Keys that must not be blank before generating
+_REQUIRED_KEYS = [
+    "gender", "family_history_with_overweight", "favc",
+    "caec", "smoke", "scc", "calc", "mtrans",
+]
 
 # =============================================================================
 # Sidebar — mode toggle (always visible)
@@ -277,7 +285,7 @@ if _input_mode == "Use sample patient (for demo)":
 
 else:
     with st.sidebar.expander("Demographics and anthropometric", expanded=True):
-        st.selectbox("Gender", ["Female", "Male"], key="gender")
+        st.selectbox("Gender", _GENDER_OPTS, key="gender")
         st.number_input("Age (years)", min_value=18, max_value=90, step=1, key="age")
         st.number_input(
             "Height (cm)", min_value=140.0, max_value=220.0, step=0.5,
@@ -390,6 +398,8 @@ else:
 
     st.sidebar.divider()
 
+    _has_blank = any(st.session_state.get(k) == "-- Select --" for k in _REQUIRED_KEYS)
+
     def _on_predict():
         st.session_state["should_predict"] = True
 
@@ -398,7 +408,10 @@ else:
         on_click=_on_predict,
         type="primary",
         use_container_width=True,
+        disabled=_has_blank,
     )
+    if _has_blank:
+        st.sidebar.caption("Fill in all required fields to generate a recommendation.")
 
 # =============================================================================
 # Helpers
