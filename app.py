@@ -109,27 +109,29 @@ st.markdown("""
 # Session state initialisation — blank defaults
 # =============================================================================
 
+_DEFAULTS_VERSION = "v2-blank"
+
 _BLANK_DEFAULTS = {
     "gender": "Female", "age": 18, "height_cm": 140.0, "weight_kg": 40.0,
     "family_history_with_overweight": "no", "favc": "no", "fcvc": 1.0,
     "ncp": 1, "caec": "no", "smoke": "no", "ch2o": 1.0,
     "scc": "no", "faf": 0.0, "tue": 0.0, "calc": "no",
     "mtrans": "Public_Transportation",
-    "blood_pressure_systolic": 120, "blood_pressure_diastolic": 80,
-    "cholesterol_level": 180, "blood_sugar_level": 90,
+    "blood_pressure_systolic": 80, "blood_pressure_diastolic": 50,
+    "cholesterol_level": 100, "blood_sugar_level": 60,
     "chronic_disease": "None", "genetic_risk_factor": "No", "allergies": "None",
-    "daily_steps": 0, "exercise_frequency": 0, "sleep_hours": 7.0,
+    "daily_steps": 0, "exercise_frequency": 0, "sleep_hours": 0.0,
     "alcohol_consumption": "No", "smoking_habit": "No",
     "dietary_habits": "Regular", "caloric_intake": 0,
     "protein_intake": 0, "carbohydrate_intake": 0, "fat_intake": 0,
     "preferred_cuisine": "Western", "food_aversions": "None",
 }
 
-for _k, _v in _BLANK_DEFAULTS.items():
-    if _k not in st.session_state:
+# Force reset if the version has changed (clears old cached moderate_risk values)
+if st.session_state.get("_defaults_version") != _DEFAULTS_VERSION:
+    for _k, _v in _BLANK_DEFAULTS.items():
         st.session_state[_k] = _v
-
-if "should_predict" not in st.session_state:
+    st.session_state["_defaults_version"] = _DEFAULTS_VERSION
     st.session_state["should_predict"] = False
 
 if "input_mode" not in st.session_state:
