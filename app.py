@@ -1,3 +1,4 @@
+import hashlib
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -129,9 +130,10 @@ components.html("""
 # Session state initialisation — blank defaults
 # =============================================================================
 
-_DEFAULTS_VERSION = "v5-blank"
+_DEFAULTS_VERSION = "v6-patientid"
 
 _BLANK_DEFAULTS = {
+    "patient_name": "",
     "gender": "-- Select --", "age": 0, "height_cm": 0.0, "weight_kg": 0.0,
     "family_history_with_overweight": "-- Select --", "favc": "-- Select --", "fcvc": 1.0,
     "ncp": 1, "caec": "-- Select --", "smoke": "-- Select --", "ch2o": 1.0,
@@ -223,6 +225,17 @@ _REQUIRED_KEYS = [
     "gender", "family_history_with_overweight", "favc",
     "caec", "smoke", "scc", "calc", "mtrans",
 ]
+
+# =============================================================================
+# Sidebar — patient name (always visible)
+# =============================================================================
+
+st.sidebar.text_input(
+    "Patient name",
+    key="patient_name",
+    placeholder="Enter patient name",
+)
+st.sidebar.divider()
 
 # =============================================================================
 # Sidebar — mode toggle (always visible)
@@ -486,6 +499,11 @@ def _clean_feat(name: str) -> str:
             return label + name[len(prefix):].replace("_", " ")
     return name.replace("_", " ")
 
+def _make_patient_id(name: str) -> str:
+    h = hashlib.md5(name.strip().lower().encode()).hexdigest()
+    return "EW-" + h[:4].upper()
+
+
 def _bmi_display_band(bmi: float) -> str:
     """WHO BMI band label for display (capitalised)."""
     if bmi < 18.5:
@@ -612,6 +630,15 @@ else:
             "<div style='display:inline-block;background:#dc3545;color:white;font-weight:700;"
             "font-size:0.8rem;padding:4px 12px;border-radius:4px;margin-bottom:1rem;"
             "letter-spacing:0.05em;'>SAMPLE / DEMO DATA - not a real patient</div>",
+            unsafe_allow_html=True,
+        )
+
+    _patient_name = ss.get("patient_name", "").strip()
+    if _patient_name:
+        _patient_id = _make_patient_id(_patient_name)
+        st.markdown(
+            f"<div style='font-size:0.9rem;color:#555;margin-bottom:0.75rem;'>"
+            f"Patient ID: <strong>{_patient_id}</strong></div>",
             unsafe_allow_html=True,
         )
 
