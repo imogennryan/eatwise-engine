@@ -69,7 +69,7 @@ SAMPLE_PATIENTS = {
 # Page config — must come before any rendering command
 # =============================================================================
 
-st.set_page_config(page_title="EatWise Engine", layout="wide")
+st.set_page_config(page_title="EatWise Engine", layout="wide", initial_sidebar_state="collapsed")
 
 try:
     st.logo("eatwise logo transparent.png", size="large")
