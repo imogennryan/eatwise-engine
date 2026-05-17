@@ -266,18 +266,21 @@ if _input_mode == "Use sample patient (for demo)":
         for _k, _v in SAMPLE_PATIENTS["high_risk"].items():
             st.session_state[_k] = _v
         st.session_state["should_predict"] = True
+        st.session_state["_is_demo"] = True
         st.rerun()
 
     if _btn_col_b.button("Moderate", use_container_width=True):
         for _k, _v in SAMPLE_PATIENTS["moderate_risk"].items():
             st.session_state[_k] = _v
         st.session_state["should_predict"] = True
+        st.session_state["_is_demo"] = True
         st.rerun()
 
     if _btn_col_c.button("Low-risk", use_container_width=True):
         for _k, _v in SAMPLE_PATIENTS["low_risk"].items():
             st.session_state[_k] = _v
         st.session_state["should_predict"] = True
+        st.session_state["_is_demo"] = True
         st.rerun()
 
 # =============================================================================
@@ -409,6 +412,7 @@ else:
 
     def _on_predict():
         st.session_state["should_predict"] = True
+        st.session_state["_is_demo"] = False
 
     st.sidebar.button(
         "Generate recommendation",
@@ -583,6 +587,7 @@ if not st.session_state.get("should_predict"):
             for _k, _v in SAMPLE_PATIENTS["moderate_risk"].items():
                 st.session_state[_k] = _v
             st.session_state["should_predict"] = True
+            st.session_state["_is_demo"] = True
             st.rerun()
 else:
     ss = st.session_state
@@ -601,6 +606,14 @@ else:
     predicted_label, prob_array = predict_obesity(lifestyle_dict)
 
     max_prob = float(np.max(prob_array))
+
+    if ss.get("_is_demo"):
+        st.markdown(
+            "<div style='display:inline-block;background:#dc3545;color:white;font-weight:700;"
+            "font-size:0.8rem;padding:4px 12px;border-radius:4px;margin-bottom:1rem;"
+            "letter-spacing:0.05em;'>SAMPLE / DEMO DATA - not a real patient</div>",
+            unsafe_allow_html=True,
+        )
 
     st.markdown(
         "<div style='background:#fff3cd;border-left:4px solid #ffc107;padding:10px 14px;"
