@@ -24,7 +24,8 @@
       "mcp__plugin_pdf-viewer_pdf__display_pdf",
       "mcp__plugin_pdf-viewer_pdf__interact",
       "Bash(python3 -c ' *)",
-      "Bash(pip3 install *)"
+      "Bash(pip3 install *)",
+      "Bash(python3 /tmp/make_tips.py)"
     ]
   }
 }

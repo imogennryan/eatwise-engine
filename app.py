@@ -909,7 +909,7 @@ else:
             "and validated training data."
         )
 
-    with st.expander("What we would improve with more time", expanded=False):
+    with st.expander("What we would improve with more time and resources", expanded=False):
         st.markdown(
             "- **Validate on Australian clinical data.** The Phase 2 model was trained on a single "
             "international survey dataset. Retraining or fine-tuning on Australian population data "
