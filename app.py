@@ -500,6 +500,15 @@ else:
         st.selectbox("Primary transport (MTRANS)", _MTRANS_OPTS, key="mtrans")
 
     with st.sidebar.expander("Clinical measurements (Phase 3 inputs)", expanded=False):
+        st.caption("For demo purposes, you can fill in population averages for a healthy adult:")
+        if st.button("Use average values (demo only)", key="_avg_clinical", use_container_width=True):
+            st.session_state["_pending_state"] = {
+                "blood_pressure_systolic": 120,
+                "blood_pressure_diastolic": 80,
+                "cholesterol_level": 180,
+                "blood_sugar_level": 85,
+            }
+            st.rerun()
         st.number_input(
             "Systolic blood pressure (mmHg)",
             min_value=0, max_value=200, step=1,
