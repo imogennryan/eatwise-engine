@@ -961,8 +961,12 @@ else:
     if _patient_name:
         _patient_id = _make_patient_id(_patient_name)
         st.markdown(
-            f"<div style='font-size:0.9rem;color:#555;margin-bottom:0.75rem;'>"
-            f"Patient ID: <strong>{_patient_id}</strong></div>",
+            f"<div style='font-size:0.9rem;color:#555;margin-bottom:0.25rem;'>"
+            f"Patient ID: <strong>{_patient_id}</strong></div>"
+            f"<div style='font-size:0.78rem;color:#8a94a0;margin-bottom:0.75rem;'>"
+            f"To protect patient privacy, patient names are not stored. Please refer to your "
+            f"practice management system (e.g. Best Practice or Medical Director) to locate "
+            f"the patient ID for your records.</div>",
             unsafe_allow_html=True,
         )
 
