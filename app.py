@@ -409,9 +409,10 @@ def _build_lifestyle_dict() -> dict:
 
 if not st.session_state.get("should_predict"):
     st.markdown(
-        "<div style='font-size:1rem; font-weight:600; color:#8cb450; margin-bottom:0.5rem;'>"
+        "<div class='mobile-hint' style='font-size:1rem; font-weight:600; color:#8cb450; margin-bottom:0.5rem;'>"
         "&#8592; tap the arrows icon to enter patient inputs"
-        "</div>",
+        "</div>"
+        "<style>@media (min-width: 768px) { .mobile-hint { display: none; } }</style>",
         unsafe_allow_html=True,
     )
     st.info(
