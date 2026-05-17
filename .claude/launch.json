@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "eatwise",
+      "runtimeExecutable": "/Users/imogenryan/Library/CloudStorage/OneDrive-TheUniversityofSydney(Students)/Year 5 Sem 1/BMET2925/Datathon Project/EatWise/run_app.sh",
+      "runtimeArgs": [],
+      "port": 8503,
+      "autoPort": true
+    }
+  ]
+}
