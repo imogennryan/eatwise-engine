@@ -927,12 +927,10 @@ if not st.session_state.get("should_predict"):
 
     st.divider()
     st.subheader("Patient History Lookup")
-    st.caption("Enter a patient name to retrieve all past visits and trend charts.")
-    _lookup_name = st.text_input("Patient name", key="_lookup_name", placeholder="Enter patient name")
-    if st.button("Look up", key="_lookup_btn") and _lookup_name.strip():
-        _lookup_id = _make_patient_id(_lookup_name.strip())
-        st.markdown(f"Searching for patient ID: **{_lookup_id}**")
-        _show_patient_history(_lookup_id)
+    st.caption("Enter a patient ID (e.g. EW-4A2F) to retrieve all past visits and trend charts.")
+    _lookup_id_input = st.text_input("Patient ID", key="_lookup_id_input", placeholder="EW-XXXX")
+    if st.button("Look up", key="_lookup_btn") and _lookup_id_input.strip():
+        _show_patient_history(_lookup_id_input.strip().upper())
 else:
     ss = st.session_state
 
