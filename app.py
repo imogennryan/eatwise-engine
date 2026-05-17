@@ -217,6 +217,7 @@ else:
         st.slider(
             "Vegetable consumption frequency (FCVC, 1–3)",
             min_value=1.0, max_value=3.0, step=0.5, key="fcvc",
+            help="How often vegetables are included in meals: 1 = never, 2 = sometimes, 3 = always.",
         )
         st.slider(
             "Number of main meals (NCP, 1–4)",
