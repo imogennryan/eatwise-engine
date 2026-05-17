@@ -413,7 +413,7 @@ st.sidebar.divider()
 
 # Reset to blank when switching to manual entry
 if _input_mode == "Manual entry" and st.session_state.get("_last_mode") != "Manual entry":
-    st.session_state["_pending_state"] = dict(_BLANK_DEFAULTS)
+    st.session_state["_pending_state"] = {**_BLANK_DEFAULTS, "input_mode": "Manual entry"}
     st.session_state["should_predict"] = False
     st.session_state["_last_mode"] = "Manual entry"
     st.rerun()
