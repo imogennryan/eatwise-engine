@@ -1,5 +1,6 @@
 import hashlib
 import numpy as np
+from supabase import create_client
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -280,6 +281,7 @@ if _input_mode == "Use sample patient (for demo)":
             st.session_state[_k] = _v
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = True
+        st.session_state["_result_saved"] = False
         st.rerun()
 
     if _btn_col_b.button("Moderate", use_container_width=True):
@@ -287,6 +289,7 @@ if _input_mode == "Use sample patient (for demo)":
             st.session_state[_k] = _v
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = True
+        st.session_state["_result_saved"] = False
         st.rerun()
 
     if _btn_col_c.button("Low-risk", use_container_width=True):
@@ -294,6 +297,7 @@ if _input_mode == "Use sample patient (for demo)":
             st.session_state[_k] = _v
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = True
+        st.session_state["_result_saved"] = False
         st.rerun()
 
 # =============================================================================
@@ -426,6 +430,7 @@ else:
     def _on_predict():
         st.session_state["should_predict"] = True
         st.session_state["_is_demo"] = False
+        st.session_state["_result_saved"] = False
 
     st.sidebar.button(
         "Generate recommendation",
@@ -498,6 +503,55 @@ def _clean_feat(name: str) -> str:
         if name.startswith(prefix):
             return label + name[len(prefix):].replace("_", " ")
     return name.replace("_", " ")
+
+@st.cache_resource
+def _get_supabase():
+    try:
+        return create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+    except Exception:
+        return None
+
+
+def _save_result(patient_id, bmi, bmi_band, predicted_class, confidence, obesity_class, nutrition, meal_plan):
+    client = _get_supabase()
+    if client is None:
+        return
+    try:
+        client.table("patient_results").insert({
+            "patient_id":            patient_id,
+            "bmi":                   round(bmi, 2),
+            "bmi_band":              bmi_band,
+            "predicted_class":       predicted_class,
+            "model_confidence":      round(confidence, 4),
+            "obesity_class":         obesity_class,
+            "recommended_calories":  nutrition["Recommended_Calories"],
+            "recommended_protein":   nutrition["Recommended_Protein"],
+            "recommended_carbs":     nutrition["Recommended_Carbs"],
+            "recommended_fats":      nutrition["Recommended_Fats"],
+            "recommended_water_ml":  nutrition["Recommended_Water_ml"],
+            "recommended_steps":     nutrition["Recommended_Steps"],
+            "meal_plan":             meal_plan,
+        }).execute()
+    except Exception:
+        pass
+
+
+def _fetch_history(patient_id: str):
+    client = _get_supabase()
+    if client is None:
+        return []
+    try:
+        resp = (
+            client.table("patient_results")
+            .select("*")
+            .eq("patient_id", patient_id)
+            .order("recorded_at", desc=False)
+            .execute()
+        )
+        return resp.data or []
+    except Exception:
+        return []
+
 
 def _make_patient_id(name: str) -> str:
     h = hashlib.md5(name.strip().lower().encode()).hexdigest()
@@ -588,6 +642,57 @@ def _build_lifestyle_dict() -> dict:
 # Main panel
 # =============================================================================
 
+def _show_patient_history(patient_id: str):
+    rows = _fetch_history(patient_id)
+    if not rows:
+        st.info(f"No records found for patient ID **{patient_id}**.")
+        return
+    df = pd.DataFrame(rows)
+    df["recorded_at"] = pd.to_datetime(df["recorded_at"]).dt.strftime("%d %b %Y %H:%M")
+    st.success(f"{len(rows)} visit(s) found for patient **{patient_id}**")
+
+    display_cols = {
+        "recorded_at": "Date",
+        "bmi": "BMI",
+        "bmi_band": "BMI Band",
+        "predicted_class": "Predicted Class",
+        "recommended_calories": "Calories (kcal)",
+        "recommended_protein": "Protein (g)",
+        "recommended_carbs": "Carbs (g)",
+        "recommended_fats": "Fats (g)",
+        "meal_plan": "Meal Plan",
+    }
+    st.dataframe(
+        df[[c for c in display_cols if c in df.columns]].rename(columns=display_cols),
+        use_container_width=True, hide_index=True,
+    )
+
+    if len(rows) > 1:
+        df_plot = pd.DataFrame(rows)
+        df_plot["Date"] = pd.to_datetime(df_plot["recorded_at"]).dt.strftime("%d %b %Y %H:%M")
+
+        st.markdown("**Trends over time**")
+        t1, t2, t3 = st.columns(3)
+
+        with t1:
+            fig_bmi = px.line(df_plot, x="Date", y="bmi", markers=True, title="BMI")
+            fig_bmi.update_layout(height=250, margin={"l":10,"r":10,"t":30,"b":10})
+            fig_bmi.update_traces(line_color="#2864a0")
+            st.plotly_chart(fig_bmi, use_container_width=True, config={"displayModeBar": False})
+
+        with t2:
+            fig_cal = px.line(df_plot, x="Date", y="recommended_calories", markers=True, title="Recommended Calories")
+            fig_cal.update_layout(height=250, margin={"l":10,"r":10,"t":30,"b":10})
+            fig_cal.update_traces(line_color="#8cb450")
+            st.plotly_chart(fig_cal, use_container_width=True, config={"displayModeBar": False})
+
+        with t3:
+            fig_conf = px.line(df_plot, x="Date", y="model_confidence", markers=True, title="Model Confidence")
+            fig_conf.update_layout(height=250, margin={"l":10,"r":10,"t":30,"b":10}, yaxis_tickformat=".0%")
+            fig_conf.update_traces(line_color="#fd7e14")
+            st.plotly_chart(fig_conf, use_container_width=True, config={"displayModeBar": False})
+
+
 if not st.session_state.get("should_predict"):
     st.markdown(
         "<div class='mobile-hint' style='font-size:1rem; font-weight:600; color:#8cb450; margin-bottom:0.5rem;'>"
@@ -606,7 +711,17 @@ if not st.session_state.get("should_predict"):
                 st.session_state[_k] = _v
             st.session_state["should_predict"] = True
             st.session_state["_is_demo"] = True
+            st.session_state["_result_saved"] = False
             st.rerun()
+
+    st.divider()
+    st.subheader("Patient History Lookup")
+    st.caption("Enter a patient name to retrieve all past visits and trend charts.")
+    _lookup_name = st.text_input("Patient name", key="_lookup_name", placeholder="Enter patient name")
+    if st.button("Look up", key="_lookup_btn") and _lookup_name.strip():
+        _lookup_id = _make_patient_id(_lookup_name.strip())
+        st.markdown(f"Searching for patient ID: **{_lookup_id}**")
+        _show_patient_history(_lookup_id)
 else:
     ss = st.session_state
 
@@ -800,6 +915,20 @@ else:
     clinical_dict = _build_clinical_dict(bmi)
     nutrition = recommend_nutrition(clinical_dict, obesity_class)
     meal_plan = recommend_meal_plan(obesity_class)
+
+    # Save to database for real patients (not demo)
+    _patient_name_saved = ss.get("patient_name", "").strip()
+    if _patient_name_saved and not ss.get("_is_demo") and not ss.get("_result_saved"):
+        _save_result(
+            patient_id=_make_patient_id(_patient_name_saved),
+            bmi=bmi, bmi_band=display_band,
+            predicted_class=predicted_label,
+            confidence=max_prob,
+            obesity_class=obesity_class,
+            nutrition=nutrition,
+            meal_plan=meal_plan,
+        )
+        st.session_state["_result_saved"] = True
 
     st.subheader("Phase 3 - Nutrition Targets")
     n_col1, n_col2, n_col3, n_col4 = st.columns(4)
