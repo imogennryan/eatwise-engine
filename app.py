@@ -1,6 +1,7 @@
 import numpy as np
 import plotly.express as px
 import streamlit as st
+import streamlit.components.v1 as components
 
 # Pipeline modules loaded once at import time (models cached in module scope).
 from pipeline.classify_obesity import CLASS_LABELS, predict_obesity
@@ -104,6 +105,24 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+# Force sidebar collapsed on every fresh page load (not on reruns)
+components.html("""
+<script>
+(function() {
+    var SESSION_KEY = 'ew_collapsed_' + Math.round(performance.timeOrigin);
+    if (sessionStorage.getItem(SESSION_KEY)) return;
+    function collapse() {
+        var btn = window.parent.document.querySelector(
+            '[data-testid="stSidebarCollapseButton"] button'
+        );
+        if (btn) { btn.click(); sessionStorage.setItem(SESSION_KEY, '1'); }
+        else { setTimeout(collapse, 100); }
+    }
+    setTimeout(collapse, 300);
+})();
+</script>
+""", height=0)
 
 # =============================================================================
 # Session state initialisation — blank defaults
