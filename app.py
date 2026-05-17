@@ -128,7 +128,7 @@ components.html("""
 # Session state initialisation — blank defaults
 # =============================================================================
 
-_DEFAULTS_VERSION = "v2-blank"
+_DEFAULTS_VERSION = "v3-blank"
 
 _BLANK_DEFAULTS = {
     "gender": "Female", "age": 18, "height_cm": 140.0, "weight_kg": 40.0,
@@ -234,6 +234,13 @@ except AttributeError:
     )
 
 st.sidebar.divider()
+
+# Reset to blank when switching to manual entry
+if _input_mode == "Manual entry" and st.session_state.get("_last_mode") != "Manual entry":
+    for _k, _v in _BLANK_DEFAULTS.items():
+        st.session_state[_k] = _v
+    st.session_state["should_predict"] = False
+st.session_state["_last_mode"] = _input_mode
 
 # =============================================================================
 # Sidebar — Mode A: sample patients
