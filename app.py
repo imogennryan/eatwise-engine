@@ -564,22 +564,30 @@ else:
             "Current caloric intake (kcal/day)",
             min_value=0, max_value=5000, step=50,
             key="caloric_intake",
+            help="Typical adult: 1,600-2,000 kcal (female) or 2,000-2,500 kcal (male). Leave as 0 to skip the current vs recommended comparison.",
         )
+        st.caption("Typical adult: 1,600-2,000 kcal (female)  |  2,000-2,500 kcal (male). Leave as 0 to skip.")
         st.number_input(
             "Current protein intake (g/day)",
             min_value=0, max_value=300, step=5,
             key="protein_intake",
+            help="Typical adult: 50-70 g/day. Athletes or high-activity individuals may consume 100-150 g/day.",
         )
+        st.caption("Typical adult: 50-70 g/day  |  High activity: 100-150 g/day")
         st.number_input(
             "Current carbohydrate intake (g/day)",
             min_value=0, max_value=600, step=5,
             key="carbohydrate_intake",
+            help="Typical adult: 200-300 g/day on a standard diet. Low-carb diets are generally under 100 g/day.",
         )
+        st.caption("Typical adult: 200-300 g/day  |  Low-carb: under 100 g/day")
         st.number_input(
             "Current fat intake (g/day)",
             min_value=0, max_value=200, step=5,
             key="fat_intake",
+            help="Typical adult: 50-80 g/day. High-fat or keto diets may be 100-150 g/day.",
         )
+        st.caption("Typical adult: 50-80 g/day  |  High-fat/keto: 100-150 g/day")
         st.selectbox("Preferred cuisine", _CUISINE_OPTS, key="preferred_cuisine")
         st.selectbox("Food aversions", _AVERSION_OPTS, key="food_aversions")
 
