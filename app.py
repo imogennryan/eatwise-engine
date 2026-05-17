@@ -1107,30 +1107,41 @@ else:
 
     st.subheader("Clinical Risk Indicators")
 
-    bp_label, bp_color   = _bp_status(ss["blood_pressure_systolic"], ss["blood_pressure_diastolic"])
-    ch_label, ch_color   = _chol_status(ss["cholesterol_level"])
-    sg_label, sg_color   = _sugar_status(ss["blood_sugar_level"])
-
     ri1, ri2, ri3 = st.columns(3)
 
-    def _risk_badge(col, title, value_str, label, color):
+    def _risk_badge(col, title, value_str, label, color, recorded=True):
         col.markdown(f"**{title}**")
         col.markdown(f"{value_str}")
-        col.markdown(
-            f"<span style='background:{color};color:white;padding:3px 10px;"
-            f"border-radius:4px;font-size:0.82rem;font-weight:600'>{label}</span>",
-            unsafe_allow_html=True,
-        )
+        if recorded:
+            col.markdown(
+                f"<span style='background:{color};color:white;padding:3px 10px;"
+                f"border-radius:4px;font-size:0.82rem;font-weight:600'>{label}</span>",
+                unsafe_allow_html=True,
+            )
+        else:
+            col.markdown(
+                "<span style='background:#adb5bd;color:white;padding:3px 10px;"
+                "border-radius:4px;font-size:0.82rem;font-weight:600'>Not recorded</span>",
+                unsafe_allow_html=True,
+            )
 
+    _bp_recorded = ss["blood_pressure_systolic"] > 0 or ss["blood_pressure_diastolic"] > 0
+    bp_label, bp_color = _bp_status(ss["blood_pressure_systolic"], ss["blood_pressure_diastolic"]) if _bp_recorded else ("", "")
     _risk_badge(ri1, "Blood Pressure",
-                f"{ss['blood_pressure_systolic']}/{ss['blood_pressure_diastolic']} mmHg",
-                bp_label, bp_color)
+                f"{ss['blood_pressure_systolic']}/{ss['blood_pressure_diastolic']} mmHg" if _bp_recorded else "No reading entered",
+                bp_label, bp_color, recorded=_bp_recorded)
+
+    _ch_recorded = ss["cholesterol_level"] > 0
+    ch_label, ch_color = _chol_status(ss["cholesterol_level"]) if _ch_recorded else ("", "")
     _risk_badge(ri2, "Cholesterol",
-                f"{ss['cholesterol_level']} mg/dL",
-                ch_label, ch_color)
+                f"{ss['cholesterol_level']} mg/dL" if _ch_recorded else "No reading entered",
+                ch_label, ch_color, recorded=_ch_recorded)
+
+    _sg_recorded = ss["blood_sugar_level"] > 0
+    sg_label, sg_color = _sugar_status(ss["blood_sugar_level"]) if _sg_recorded else ("", "")
     _risk_badge(ri3, "Blood Sugar",
-                f"{ss['blood_sugar_level']} mg/dL",
-                sg_label, sg_color)
+                f"{ss['blood_sugar_level']} mg/dL" if _sg_recorded else "No reading entered",
+                sg_label, sg_color, recorded=_sg_recorded)
 
     if ss.get("chronic_disease", "None") != "None":
         st.caption(f"Chronic disease on record: **{ss['chronic_disease']}**")
