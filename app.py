@@ -504,22 +504,29 @@ else:
             "Systolic blood pressure (mmHg)",
             min_value=0, max_value=200, step=1,
             key="blood_pressure_systolic",
+            help="Average healthy adult: ~120 mmHg. Leave as 0 if not available.",
         )
         st.number_input(
             "Diastolic blood pressure (mmHg)",
             min_value=0, max_value=120, step=1,
             key="blood_pressure_diastolic",
+            help="Average healthy adult: ~80 mmHg. Leave as 0 if not available.",
         )
+        st.caption("Average healthy blood pressure: 120/80 mmHg. Enter 0 if no recent reading is available.")
         st.number_input(
             "Cholesterol (mg/dL)",
             min_value=0, max_value=350, step=1,
             key="cholesterol_level",
+            help="Desirable: below 200 mg/dL. Average healthy adult: ~180 mg/dL. Leave as 0 if not available.",
         )
+        st.caption("Average healthy cholesterol: ~180 mg/dL. Enter 0 if not available.")
         st.number_input(
             "Blood sugar (mg/dL)",
             min_value=0, max_value=300, step=1,
             key="blood_sugar_level",
+            help="Normal fasting: 70-99 mg/dL. Average healthy adult: ~85 mg/dL. Leave as 0 if not available.",
         )
+        st.caption("Normal fasting blood sugar: 70-99 mg/dL. Enter 0 if not available.")
         st.selectbox("Chronic disease", _CHRONIC_OPTS, key="chronic_disease")
         st.selectbox("Genetic risk factor", _YN_TITLE, key="genetic_risk_factor")
         st.selectbox("Allergies", _ALLERGY_OPTS, key="allergies")
