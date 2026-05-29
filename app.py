@@ -30,7 +30,6 @@ SAMPLE_PATIENTS = {
         "allergies": "None",
         # Behavioural / dietary - Phase 3 inputs
         "daily_steps": 2500, "exercise_frequency": 1, "sleep_hours": 6.0,
-        "alcohol_consumption": "No", "smoking_habit": "Yes",
         "dietary_habits": "Regular", "caloric_intake": 2800,
         "protein_intake": 65, "carbohydrate_intake": 350, "fat_intake": 120,
         "preferred_cuisine": "Western", "food_aversions": "None",
@@ -46,7 +45,6 @@ SAMPLE_PATIENTS = {
         "chronic_disease": "None", "genetic_risk_factor": "No",
         "allergies": "None",
         "daily_steps": 7000, "exercise_frequency": 3, "sleep_hours": 7.0,
-        "alcohol_consumption": "No", "smoking_habit": "No",
         "dietary_habits": "Regular", "caloric_intake": 2300,
         "protein_intake": 110, "carbohydrate_intake": 270, "fat_intake": 80,
         "preferred_cuisine": "Western", "food_aversions": "None",
@@ -62,7 +60,6 @@ SAMPLE_PATIENTS = {
         "chronic_disease": "None", "genetic_risk_factor": "No",
         "allergies": "None",
         "daily_steps": 12000, "exercise_frequency": 5, "sleep_hours": 8.0,
-        "alcohol_consumption": "No", "smoking_habit": "No",
         "dietary_habits": "Regular", "caloric_intake": 1900,
         "protein_intake": 100, "carbohydrate_intake": 230, "fat_intake": 65,
         "preferred_cuisine": "Western", "food_aversions": "None",
@@ -277,7 +274,7 @@ components.html("""
 # Session state initialisation - blank defaults
 # =============================================================================
 
-_DEFAULTS_VERSION = "v7-pendingfix"
+_DEFAULTS_VERSION = "v8-dedup-smoke-alcohol"
 
 _BLANK_DEFAULTS = {
     "patient_name": "",
@@ -290,7 +287,6 @@ _BLANK_DEFAULTS = {
     "cholesterol_level": 0, "blood_sugar_level": 0,
     "chronic_disease": "None", "genetic_risk_factor": "No", "allergies": "None",
     "daily_steps": 0, "exercise_frequency": 0, "sleep_hours": 0.0,
-    "alcohol_consumption": "No", "smoking_habit": "No",
     "dietary_habits": "Regular", "caloric_intake": 0,
     "protein_intake": 0, "carbohydrate_intake": 0, "fat_intake": 0,
     "preferred_cuisine": "Western", "food_aversions": "None",
@@ -470,75 +466,120 @@ else:
             "Family history of overweight",
             _YES_NO,
             key="family_history_with_overweight",
+            help="Does the patient have a parent or sibling who has been overweight?",
         )
-        st.selectbox("Frequent high-calorie food (FAVC)", _YES_NO, key="favc")
+        st.selectbox(
+            "Frequent high-calorie food",
+            _YES_NO,
+            key="favc",
+            help="Does the patient regularly eat high-calorie foods such as fast food, fried food, or sugary snacks?",
+        )
         st.slider(
-            "Vegetable consumption frequency (FCVC, 1–3)",
+            "Vegetable intake frequency (1–3)",
             min_value=1.0, max_value=3.0, step=0.5, key="fcvc",
             help="How often vegetables are included in meals: 1 = never, 2 = sometimes, 3 = always.",
         )
+        st.caption("1 = rarely  |  2 = sometimes  |  3 = always")
         st.slider(
-            "Number of main meals (NCP, 1–4)",
+            "Number of main meals per day (1–4)",
             min_value=1, max_value=4, step=1, key="ncp",
+            help="How many main meals does the patient eat per day? e.g. 1 = one main meal only, 3 = breakfast, lunch and dinner.",
         )
-        st.selectbox("Snacking between meals (CAEC)", _FREQ_OPTS, key="caec")
-        st.selectbox("Smoke", _YES_NO, key="smoke")
+        st.selectbox(
+            "Snacking between meals",
+            _FREQ_OPTS,
+            key="caec",
+            help="How often does the patient eat between main meals? no = never, Sometimes = a few times a week, Frequently = most days, Always = every day.",
+        )
+        st.selectbox(
+            "Smoking",
+            _YES_NO,
+            key="smoke",
+            help="Does the patient currently smoke tobacco?",
+        )
         st.slider(
-            "Daily water intake (CH2O, 1–3 L)",
+            "Daily water intake (1–3 L)",
             min_value=1.0, max_value=3.0, step=0.5, key="ch2o",
+            help="Estimated daily water intake in litres: 1 = less than 1 litre, 2 = around 1-2 litres, 3 = more than 2 litres.",
         )
-        st.selectbox("Calorie monitoring (SCC)", _YES_NO, key="scc")
+        st.caption("1 = <1 L/day  |  2 = 1-2 L/day  |  3 = >2 L/day")
+        st.selectbox(
+            "Calorie monitoring",
+            _YES_NO,
+            key="scc",
+            help="Does the patient actively track or count their daily calorie intake (e.g. using an app or food diary)?",
+        )
         st.slider(
-            "Physical activity frequency (FAF, 0–3 days/wk)",
+            "Physical activity frequency (days/week, 0–3)",
             min_value=0.0, max_value=3.0, step=0.5, key="faf",
+            help="How many days per week does the patient do physical activity? 0 = sedentary, 1 = light, 2 = moderate, 3 = active.",
         )
+        st.caption("0 = sedentary  |  1 = light  |  2 = moderate  |  3 = active")
         st.slider(
-            "Technology use time (TUE, 0–2 hrs/day)",
+            "Screen/technology time (hrs/day, 0–2)",
             min_value=0.0, max_value=2.0, step=0.5, key="tue",
+            help="Hours per day spent on screens or devices (TV, phone, computer) outside of work or study. 0 = minimal use, 1 = moderate, 2 = heavy use.",
         )
-        st.selectbox("Alcohol consumption (CALC)", _FREQ_OPTS, key="calc")
-        st.selectbox("Primary transport (MTRANS)", _MTRANS_OPTS, key="mtrans")
+        st.caption("0 = minimal  |  1 = moderate  |  2 = heavy daily use")
+        st.selectbox(
+            "Alcohol consumption",
+            _FREQ_OPTS,
+            key="calc",
+            help="How often does the patient consume alcohol? no = never, Sometimes = occasionally (e.g. weekends), Frequently = most days, Always = daily.",
+        )
+        st.selectbox(
+            "Primary mode of transport",
+            _MTRANS_OPTS,
+            key="mtrans",
+            help="The patient's main way of getting around day-to-day. This affects estimated incidental physical activity.",
+        )
 
     with st.sidebar.expander("Clinical measurements (Phase 3 inputs)", expanded=False):
-        st.caption("For demo purposes, you can fill in population averages for a healthy adult:")
-        if st.button("Use average values (demo only)", key="_avg_clinical", use_container_width=True):
-            st.session_state["_pending_state"] = {
-                "blood_pressure_systolic": 120,
-                "blood_pressure_diastolic": 80,
-                "cholesterol_level": 180,
-                "blood_sugar_level": 85,
-            }
-            st.rerun()
         st.number_input(
             "Systolic blood pressure (mmHg)",
             min_value=0, max_value=200, step=1,
             key="blood_pressure_systolic",
-            help="Average healthy adult: ~120 mmHg. Leave as 0 if not available.",
+            help="Use 120 if unsure. Average healthy adult: ~120 mmHg.",
         )
         st.number_input(
             "Diastolic blood pressure (mmHg)",
             min_value=0, max_value=120, step=1,
             key="blood_pressure_diastolic",
-            help="Average healthy adult: ~80 mmHg. Leave as 0 if not available.",
+            help="Use 80 if unsure. Average healthy adult: ~80 mmHg.",
         )
-        st.caption("Average healthy blood pressure: 120/80 mmHg. Enter 0 if no recent reading is available.")
+        st.caption("Average: 120/80 mmHg. Use these values if no recent reading is available.")
         st.number_input(
             "Cholesterol (mg/dL)",
             min_value=0, max_value=350, step=1,
             key="cholesterol_level",
-            help="Desirable: below 200 mg/dL. Average healthy adult: ~180 mg/dL. Leave as 0 if not available.",
+            help="Use 180 if unsure. Desirable: below 200 mg/dL. Average healthy adult: ~180 mg/dL.",
         )
-        st.caption("Average healthy cholesterol: ~180 mg/dL. Enter 0 if not available.")
+        st.caption("Average: ~180 mg/dL. Use this value if not available.")
         st.number_input(
             "Blood sugar (mg/dL)",
             min_value=0, max_value=300, step=1,
             key="blood_sugar_level",
-            help="Normal fasting: 70-99 mg/dL. Average healthy adult: ~85 mg/dL. Leave as 0 if not available.",
+            help="Use 85 if unsure. Normal fasting range: 70-99 mg/dL. Average healthy adult: ~85 mg/dL.",
         )
-        st.caption("Normal fasting blood sugar: 70-99 mg/dL. Enter 0 if not available.")
-        st.selectbox("Chronic disease", _CHRONIC_OPTS, key="chronic_disease")
-        st.selectbox("Genetic risk factor", _YN_TITLE, key="genetic_risk_factor")
-        st.selectbox("Allergies", _ALLERGY_OPTS, key="allergies")
+        st.caption("Average: ~85 mg/dL. Use this value if not available.")
+        st.selectbox(
+            "Chronic disease",
+            _CHRONIC_OPTS,
+            key="chronic_disease",
+            help="Select the patient's primary diagnosed chronic condition if applicable. Select None if no chronic disease is recorded.",
+        )
+        st.selectbox(
+            "Genetic risk factor",
+            _YN_TITLE,
+            key="genetic_risk_factor",
+            help="Does the patient have a known family history of obesity-related genetic conditions (e.g. familial hypercholesterolaemia, monogenic obesity)?",
+        )
+        st.selectbox(
+            "Food allergies",
+            _ALLERGY_OPTS,
+            key="allergies",
+            help="Select any known food allergies. This informs the meal plan recommendation.",
+        )
 
     with st.sidebar.expander("Behavioural and dietary (Phase 3 inputs)", expanded=False):
         st.number_input(
@@ -551,15 +592,21 @@ else:
             "Exercise frequency (days/week)",
             min_value=0, max_value=7, step=1,
             key="exercise_frequency",
+            help="Number of days per week the patient does structured exercise such as gym, sport, swimming, or a fitness class. 0 = no structured exercise.",
         )
         st.number_input(
             "Sleep (hours/night)",
             min_value=0.0, max_value=12.0, step=0.5, format="%.1f",
             key="sleep_hours",
+            help="Average hours of sleep per night. The recommended range for adults is 7-9 hours. Poor sleep is associated with increased obesity risk.",
         )
-        st.selectbox("Alcohol consumption", _YN_TITLE, key="alcohol_consumption")
-        st.selectbox("Smoking habit", _YN_TITLE, key="smoking_habit")
-        st.selectbox("Dietary habits", _DIET_OPTS, key="dietary_habits")
+        st.caption("Recommended for adults: 7-9 hours/night")
+        st.selectbox(
+            "Dietary habits",
+            _DIET_OPTS,
+            key="dietary_habits",
+            help="The patient's general eating pattern. Regular = no specific dietary approach, Vegetarian = no meat, Vegan = no animal products, Keto = high fat/low carb, Intermittent Fasting = time-restricted eating.",
+        )
         st.number_input(
             "Current caloric intake (kcal/day)",
             min_value=0, max_value=5000, step=50,
@@ -588,8 +635,18 @@ else:
             help="Typical adult: 50-80 g/day. High-fat or keto diets may be 100-150 g/day.",
         )
         st.caption("Typical adult: 50-80 g/day  |  High-fat/keto: 100-150 g/day")
-        st.selectbox("Preferred cuisine", _CUISINE_OPTS, key="preferred_cuisine")
-        st.selectbox("Food aversions", _AVERSION_OPTS, key="food_aversions")
+        st.selectbox(
+            "Preferred cuisine",
+            _CUISINE_OPTS,
+            key="preferred_cuisine",
+            help="The patient's preferred food culture or cuisine style. Used to personalise meal plan guidance.",
+        )
+        st.selectbox(
+            "Food aversions",
+            _AVERSION_OPTS,
+            key="food_aversions",
+            help="Any foods the patient dislikes or avoids for non-allergy reasons (e.g. texture, taste). Select None if no specific aversions.",
+        )
 
     st.sidebar.divider()
 
@@ -774,8 +831,8 @@ def _build_clinical_dict(bmi: float) -> dict:
         "Daily_Steps":        ss["daily_steps"],
         "Exercise_Frequency": ss["exercise_frequency"],
         "Sleep_Hours":        ss["sleep_hours"],
-        "Alcohol_Consumption": ss["alcohol_consumption"],
-        "Smoking_Habit":      ss["smoking_habit"],
+        "Alcohol_Consumption": "No" if ss["calc"] == "no" else "Yes",
+        "Smoking_Habit":      "Yes" if ss["smoke"] == "yes" else "No",
         # Dietary
         "Dietary_Habits":       ss["dietary_habits"],
         "Caloric_Intake":       ss["caloric_intake"],
@@ -1086,29 +1143,6 @@ else:
         "Model performance on held-out test data: **accuracy 85%, weighted F1 0.85**."
     )
 
-    # Feature importance chart
-    with st.expander("What drove this prediction?", expanded=False):
-        fi_pairs = get_feature_importances(12)
-        fi_df = pd.DataFrame({
-            "Feature":    [_clean_feat(n) for n, _ in fi_pairs],
-            "Importance": [v for _, v in fi_pairs],
-        })
-        fi_fig = px.bar(
-            fi_df, x="Importance", y="Feature", orientation="h",
-            title="Top lifestyle factors in the Random Forest model",
-            text=fi_df["Importance"].map(lambda v: f"{v*100:.1f}%"),
-        )
-        fi_fig.update_layout(
-            yaxis={"categoryorder": "array", "categoryarray": fi_df["Feature"].tolist()[::-1]},
-            height=380, margin={"l": 10, "r": 10, "t": 40, "b": 10},
-        )
-        fi_fig.update_traces(textposition="outside", marker_color="#8cb450")
-        st.plotly_chart(fi_fig, use_container_width=True, config={"displayModeBar": False})
-        st.caption(
-            "Feature importance reflects which inputs most influenced the Random Forest across all training data. "
-            "It shows overall model behaviour, not a per-patient explanation."
-        )
-
     st.divider()
 
     # ------------------------------------------------------------------
@@ -1362,7 +1396,7 @@ else:
     # Section E: Limitations and prototype scope
     # ------------------------------------------------------------------
 
-    with st.expander("Limitations and prototype scope", expanded=True):
+    with st.expander("Limitations and prototype scope", expanded=False):
 
         st.markdown(
             "**This is a BMET2925 academic prototype. Not for clinical use.**"
@@ -1402,6 +1436,51 @@ else:
             "**Sample patients** are synthetic profiles for demonstration only. "
             "In clinical use, replace with actual patient data, subject to ethical approval "
             "and validated training data."
+        )
+
+        st.markdown("---")
+        st.markdown("#### Requirements for clinical deployment")
+
+        st.markdown(
+            "**Regulatory approval (TGA).** Any software that influences a clinical decision "
+            "is classified as a Software as a Medical Device (SaMD) under Australian law. "
+            "This tool would require TGA registration under the Medical Devices Regulations 2002 "
+            "before it could be used in a clinical setting."
+        )
+
+        st.markdown(
+            "**Clinical validation.** The Phase 2 classifier must be validated prospectively "
+            "on Australian clinical populations before results can be acted upon. "
+            "This requires ethics approval (HREC), a suitable cohort, and independent "
+            "statistical review of sensitivity, specificity, and clinical utility."
+        )
+
+        st.markdown(
+            "**Integration with clinical systems.** For point-of-care use, the tool would "
+            "need to integrate with existing practice management software such as Best Practice "
+            "or Medical Director via HL7 FHIR or equivalent interoperability standards, "
+            "so patient data does not need to be re-entered manually."
+        )
+
+        st.markdown(
+            "**Data governance and privacy compliance.** All patient data must be handled "
+            "in accordance with the Privacy Act 1988 (Cth) and the Australian Privacy Principles. "
+            "Storage must use Australian-hosted, healthcare-grade infrastructure with audit "
+            "logging, role-based access control, and data retention policies."
+        )
+
+        st.markdown(
+            "**Dietitian oversight and clinical governance.** Outputs must be reviewed by an "
+            "Accredited Practising Dietitian (APD) before any dietary advice is given to a patient. "
+            "A clinical governance framework is needed to define responsibility for the tool's "
+            "outputs, including escalation pathways and liability."
+        )
+
+        st.markdown(
+            "**Ongoing monitoring and model maintenance.** The classifier must be monitored "
+            "for model drift over time as population characteristics and clinical guidelines change. "
+            "A retraining and revalidation schedule is required, along with version control "
+            "and a change management process."
         )
 
     with st.expander("What we would improve with more time and resources", expanded=False):

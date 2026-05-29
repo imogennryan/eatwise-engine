@@ -37,17 +37,17 @@ _DAILY_STEPS = {
 # Protein target (g per kg body weight) by obesity class.
 _PROTEIN_G_PER_KG = {
     "underweight": 1.6,   # anabolic support
-    "normal":      1.2,   # maintenance
-    "overweight":  1.4,   # satiety and lean-mass preservation
-    "obese":       1.6,   # lean-mass preservation during deficit
+    "normal":      1.4,   # maintenance
+    "overweight":  1.6,   # satiety and lean-mass preservation
+    "obese":       1.8,   # lean-mass preservation during calorie deficit
 }
 
 # Fat as fraction of target calories by obesity class.
 _FAT_FRACTION = {
     "underweight": 0.30,
-    "normal":      0.30,
-    "overweight":  0.28,
-    "obese":       0.25,
+    "normal":      0.28,
+    "overweight":  0.25,
+    "obese":       0.20,  # low-fat diet: 20% of calories from fat
 }
 
 
@@ -91,10 +91,10 @@ def recommend_nutrition(clinical_dict: dict, obesity_class: str) -> dict:
     target_cal = max(target_cal, 1200.0)
 
     # Macros
-    protein_g = _PROTEIN_G_PER_KG.get(oc, 1.2) * weight
-    # Cap protein at 30% of target calories — prevents unrealistically high absolute
-    # amounts for very heavy patients (e.g. 200 kg obese → 320 g without cap).
-    protein_g = min(protein_g, 0.30 * target_cal / 4)
+    protein_g = _PROTEIN_G_PER_KG.get(oc, 1.4) * weight
+    # Cap protein at 35% of target calories — prevents unrealistically high absolute
+    # amounts for very heavy patients (e.g. 200 kg obese → 360 g without cap).
+    protein_g = min(protein_g, 0.35 * target_cal / 4)
     fat_g     = (_FAT_FRACTION.get(oc, 0.30) * target_cal) / 9
     carb_g    = max((target_cal - protein_g * 4 - fat_g * 9) / 4, 0.0)
 
